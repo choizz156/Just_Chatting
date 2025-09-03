@@ -10,11 +10,11 @@ import org.springframework.data.redis.connection.MessageListener
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.listener.RedisMessageListenerContainer
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 
-@Service
+@Component
 class RedisMessageBroker(
     private val redisTemplate: RedisTemplate<String, String>,
     private val messageListenerContainer: RedisMessageListenerContainer,
