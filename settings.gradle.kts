@@ -5,4 +5,5 @@ plugins {
 rootProject.name = "algo_chat"
 
 include("chat-application",
-    "chat-domain")
+    "chat-domain",
+    "chat-persistence")
