@@ -1,4 +1,4 @@
-package domain.entity
+package com.chat.core.domain.entity
 
 import jakarta.persistence.*
 import org.springframework.data.annotation.CreatedDate

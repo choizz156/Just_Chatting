@@ -1,8 +1,8 @@
-package application
+package com.chat.core.application
 
-import com.chat.domain.dto.CreateUserRequest
-import com.chat.domain.dto.LoginRequest
-import com.chat.domain.dto.UserDto
+import com.chat.core.dto.CreateUserRequest
+import com.chat.core.dto.LoginRequest
+import com.chat.core.dto.UserDto
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 

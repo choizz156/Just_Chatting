@@ -12,7 +12,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":chat-domain"))
+    implementation(project(":chat-core"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 

@@ -13,7 +13,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":chat-domain"))
+    implementation(project(":chat-core"))
     implementation(project(":chat-persistence"))
 
     implementation("org.springframework.boot:spring-boot-starter")

@@ -1,8 +1,8 @@
-package com.chat.domain.dto
+package com.chat.core.dto
 
+import com.chat.core.domain.entity.MessageType
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import domain.entity.MessageType
 import java.time.LocalDateTime
 
 

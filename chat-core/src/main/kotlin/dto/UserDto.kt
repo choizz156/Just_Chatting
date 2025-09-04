@@ -1,4 +1,4 @@
-package com.chat.domain.dto
+package com.chat.core.dto
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size

@@ -1,12 +1,13 @@
-package application
+package com.chat.core.application
 
-import dto.ChatRoomDto
-import dto.ChatRoomMemberDto
-import dto.CreateChatRoomRequest
-import dto.MessageDto
-import dto.MessagePageRequest
-import dto.MessagePageResponse
-import dto.SendMessageRequest
+
+import com.chat.core.dto.ChatRoomDto
+import com.chat.core.dto.ChatRoomMemberDto
+import com.chat.core.dto.CreateChatRoomRequest
+import com.chat.core.dto.MessageDto
+import com.chat.core.dto.MessagePageRequest
+import com.chat.core.dto.MessagePageResponse
+import com.chat.core.dto.SendMessageRequest
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 

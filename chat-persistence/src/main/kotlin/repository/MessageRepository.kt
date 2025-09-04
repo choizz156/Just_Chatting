@@ -1,11 +1,10 @@
-package repository
+package com.chat.persistence.repository
 
-import domain.entity.Message
+import com.chat.core.domain.entity.Message
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import java.lang.annotation.Native
 
 interface MessageRepository : JpaRepository<Message, Long> {
 

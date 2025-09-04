@@ -1,4 +1,4 @@
-package config
+package com.chat.persistence.config
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper

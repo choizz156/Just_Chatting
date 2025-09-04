@@ -1,6 +1,6 @@
-package repository
+package com.chat.persistence.repository
 
-import domain.entity.ChatRoomMember
+import com.chat.core.domain.entity.ChatRoomMember
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository

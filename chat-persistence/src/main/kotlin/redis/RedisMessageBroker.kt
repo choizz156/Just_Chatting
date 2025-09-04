@@ -1,6 +1,6 @@
-package redis
+package com.chat.persistence.redis
 
-import com.chat.domain.dto.ChatMessage
+import com.chat.core.dto.ChatMessage
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy

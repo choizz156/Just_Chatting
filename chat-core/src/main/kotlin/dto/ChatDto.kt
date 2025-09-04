@@ -1,15 +1,14 @@
-package dto
+package com.chat.core.dto
 
-import com.chat.domain.dto.UserDto
-import domain.entity.ChatRoomType
-import domain.entity.MemberRole
-import domain.entity.MessageType
+import com.chat.core.domain.entity.ChatRoomType
+import com.chat.core.domain.entity.MemberRole
+import com.chat.core.domain.entity.MessageType
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import java.time.LocalDateTime
 
-data class ChatRoomDto (
+data class ChatRoomDto(
     val id: Long,
     val name: String,
     val description: String?,
@@ -68,6 +67,7 @@ data class MessagePageRequest(
     val limit: Int = 50,
     val direction: MessageDirection = MessageDirection.BEFORE
 )
+
 enum class MessageDirection {
     BEFORE,
     AFTER
