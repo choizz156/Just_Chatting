@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.security.MessageDigest
 import java.time.LocalDateTime
 
 
@@ -83,7 +84,7 @@ class UserServiceV1(
 
     private fun hashPassword(password: String): String {
         val bytes =
-            java.security.MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
+            MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
         return bytes.joinToString("") { "%02x".format(it) }
     }
 }
