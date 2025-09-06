@@ -19,4 +19,9 @@ interface ChatRoomRepository : JpaRepository<ChatRoom, Long> {
     fun findUserChatRoom(userId: Long, pageable: Pageable): Page<ChatRoom>
     fun findByIsActiveTrueOrderByCreatedAtDesc(): List<ChatRoom>
     fun findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc(name: String): List<ChatRoom>
+    fun findByIdOrThrow(roomId: Long): ChatRoom{
+        return findById(roomId)
+            .orElseThrow { IllegalArgumentException("채팅방을 찾을 수 없습니다.: $roomId") }
+
+    }
 }
