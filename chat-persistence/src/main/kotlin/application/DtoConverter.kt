@@ -3,6 +3,7 @@ package com.chat.persistence.application
 import com.chat.core.domain.entity.ChatRoom
 import com.chat.core.domain.entity.Message
 import com.chat.core.domain.entity.User
+import com.chat.core.dto.ChatMessage
 import com.chat.core.dto.ChatRoomDto
 import com.chat.core.dto.MessageDto
 import com.chat.core.dto.UserDto
@@ -62,6 +63,19 @@ class DtoConverter(
             isActive = user.isActive,
             lastSeenAt = user.lastSeenAt,
             createdAt = user.createdAt
+        )
+    }
+
+    fun toChatMessage(savedMessage: Message): ChatMessage {
+        return ChatMessage(
+            id = savedMessage.id,
+            content = savedMessage.content ?: "",
+            type = savedMessage.type,
+            chatRoomId = savedMessage.chatRoom.id,
+            senderId = savedMessage.sender.id,
+            senderName = savedMessage.sender.displayName,
+            sequenceNumber = savedMessage.sequenceNumber,
+            timestamp = savedMessage.createdAt
         )
     }
 }

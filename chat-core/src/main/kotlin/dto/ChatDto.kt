@@ -23,13 +23,13 @@ data class ChatRoomDto(
 )
 
 data class CreateChatRoomRequest(
-    @field:NotBlank(message = "채팅방 이름은 필수입니다") // {"name": ""}
+    @field:NotBlank(message = "채팅방 이름은 필수입니다")
     @field:Size(min = 1, max = 100, message = "채팅방 이름은 1-100자 사이여야 합니다")
     val name: String,
 
     val description: String?,
 
-    @field:NotNull(message = "채팅방 타입은 필수입니다") // {"type" :null}
+    @field:NotNull(message = "채팅방 타입은 필수입니다")
     val type: ChatRoomType,
 
     val imageUrl: String?,
@@ -60,7 +60,6 @@ data class SendMessageRequest(
     val content: String?
 )
 
-// 커서 기반 페이지네이션을 위한 DTO
 data class MessagePageRequest(
     val chatRoomId: Long,
     val cursor: Long? = null,
@@ -75,8 +74,8 @@ enum class MessageDirection {
 
 data class MessagePageResponse(
     val messages: List<MessageDto>,
-    val nextCursor: Long?, // 다음 페이지를 위한 커서
-    val prevCursor: Long?, // 이전 페이지를 위한 커서
+    val nextCursor: Long?,
+    val prevCursor: Long?,
     val hasNext: Boolean,
     val hasPrev: Boolean
 )

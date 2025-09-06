@@ -7,7 +7,6 @@ import com.chat.core.dto.*
 import com.chat.persistence.redis.RedisMessageBroker
 import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.chat.persistence.repository.ChatRoomRepository
-import com.chat.persistence.repository.MessageRepository
 import com.chat.persistence.repository.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CacheEvict
@@ -19,11 +18,10 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class ChatServiceV1(
     private val chatRoomRepository: ChatRoomRepository,
-    private val messageRepository: MessageRepository,
     private val chatRoomMemberRepository: ChatRoomMemberRepository,
     private val userRepository: UserRepository,
     private val redisMessageBroker: RedisMessageBroker,
-    private val messageSequenceService: MessageSequenceService,
+    private val messageService: MessageService,
     private val webSocketSessionManager: WebSocketSessionManager,
     private val dtoConverter: DtoConverter,
     private val validator: Validator
@@ -38,24 +36,8 @@ class ChatServiceV1(
     ): ChatRoomDto {
         val creator = userRepository.findByIdOrThrow(createdBy)
 
-        val chatRoom = ChatRoom(
-            name = request.name,
-            description = request.description,
-            type = request.type,
-            imageUrl = request.imageUrl,
-            maxMembers = request.maxMembers,
-            createdBy = creator
-        )
-
-        val savedRoom = chatRoomRepository.save(chatRoom)
-
-        val ownerMember = ChatRoomMember(
-            chatRoom = savedRoom,
-            user = creator,
-            role = MemberRole.OWNER,
-        )
-
-        chatRoomMemberRepository.save(ownerMember)
+        val savedRoom = saveChatRoom(request, creator)
+        saveChatRoomMember(savedRoom, creator)
 
         if (webSocketSessionManager.isUserOnlineLocally(creator.id)) {
             webSocketSessionManager.joinRoom(creator.id, savedRoom.id)
@@ -97,45 +79,53 @@ class ChatServiceV1(
     )
     override fun leaveChatRoom(roomId: Long, userId: Long) {
         chatRoomMemberRepository.leaveChatRoom(roomId, userId)
+        if (webSocketSessionManager.isUserOnlineLocally(userId)) {
+            webSocketSessionManager.leaveRoom(userId, roomId)
+        }
     }
-
 
     override fun sendMessage(
         request: SendMessageRequest,
         senderId: Long
     ): MessageDto {
-        val chatRoom = chatRoomRepository.findByIdOrThrow(request.chatRoomId)
-        val sender = userRepository.findByIdOrThrow(senderId)
 
         validator.isNotChatRoomMemeber(request.chatRoomId, senderId)
 
-        val sequenceNumber = messageSequenceService.getNextSequence(request.chatRoomId)
+        val savedMessage = saveMessage(request, senderId)
+        val chatMessage = dtoConverter.toChatMessage(savedMessage)
+
+        publishMessage(request, chatMessage)
+
+        return dtoConverter.messageToDto(savedMessage)
+    }
+
+
+    private fun saveMessage(
+        request: SendMessageRequest,
+        senderId: Long
+    ): Message {
+        val chatRoom = chatRoomRepository.findByIdOrThrow(request.chatRoomId)
+        val sender = userRepository.findByIdOrThrow(senderId)
+        val sequenceNumber = messageService.getNextSequence(request.chatRoomId)
+
         val message = Message(
             content = request.content,
             sequenceNumber = sequenceNumber,
             sender = sender,
             chatRoom = chatRoom,
-            type = request.type ?: MessageType.TEXT
+            type = request.type
         )
 
-        val savedMessage = messageRepository.save(message)
+        val savedMessage = messageService.saveMessage(message)
+        return savedMessage
+    }
 
-        val chatMessage = ChatMessage(
-            id = savedMessage.id,
-            content = savedMessage.content ?: "",
-            type = savedMessage.type,
-            chatRoomId = savedMessage.chatRoom.id,
-            senderId = savedMessage.sender.id,
-            senderName = savedMessage.sender.displayName,
-            sequenceNumber = savedMessage.sequenceNumber,
-            timestamp = savedMessage.createdAt
-        )
-
+    private fun publishMessage(
+        request: SendMessageRequest,
+        chatMessage: ChatMessage
+    ) {
         webSocketSessionManager.sendMessageToLocalRoom(request.chatRoomId, chatMessage)
-
         broadcastMessage(request, chatMessage)
-
-        return dtoConverter.messageToDto(savedMessage)
     }
 
     private fun broadcastMessage(
@@ -151,6 +141,36 @@ class ChatServiceV1(
         } catch (e: Exception) {
             logger.error("Failed to broadcast message via Redis: ${e.message}", e)
         }
+    }
+
+    private fun saveChatRoomMember(
+        savedRoom: ChatRoom,
+        creator: User
+    ) {
+        val ownerMember = ChatRoomMember(
+            chatRoom = savedRoom,
+            user = creator,
+            role = MemberRole.OWNER,
+        )
+
+        chatRoomMemberRepository.save(ownerMember)
+    }
+
+    private fun saveChatRoom(
+        request: CreateChatRoomRequest,
+        creator: User
+    ): ChatRoom {
+        val chatRoom = ChatRoom(
+            name = request.name,
+            description = request.description,
+            type = request.type,
+            imageUrl = request.imageUrl,
+            maxMembers = request.maxMembers,
+            createdBy = creator
+        )
+
+        val savedRoom = chatRoomRepository.save(chatRoom)
+        return savedRoom
     }
 }
 

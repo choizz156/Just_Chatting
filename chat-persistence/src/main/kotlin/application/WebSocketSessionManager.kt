@@ -2,7 +2,6 @@ package com.chat.persistence.application
 
 import com.chat.core.dto.ChatMessage
 import com.chat.persistence.redis.RedisMessageBroker
-import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
@@ -19,7 +18,6 @@ class WebSocketSessionManager(
     private val redisTemplate: RedisTemplate<String, String>,
     private val objectMapper: ObjectMapper,
     private val redisMessageBroker: RedisMessageBroker,
-    private val chatRoomMemberRepository: ChatRoomMemberRepository,
 ) {
     private val logger =
         LoggerFactory.getLogger(WebSocketSessionManager::class.java)
@@ -55,6 +53,29 @@ class WebSocketSessionManager(
 
         if (userSession.isEmpty()) {
             deleteRoomIfNoConnectedUsers()
+        }
+    }
+
+    fun leaveRoom(userId: Long, roomId: Long) {
+        val userSessions = userSession[userId] ?: return
+        val sessionsInRoom = roomSessions[roomId] ?: return
+
+        val removed = sessionsInRoom.removeAll(userSessions.toSet())
+
+        if (removed) {
+            logger.info("User $userId's sessions removed from room $roomId")
+        }
+
+        if (sessionsInRoom.isEmpty()) {
+            roomSessions.remove(roomId)
+
+            val serverId = redisMessageBroker.getServerId()
+            val serverRoomKey = "$SERVER_ROOMS_KEY_PREFIX$serverId"
+
+            redisMessageBroker.unsubscribeFromRoom(roomId)
+            redisTemplate.opsForSet().remove(serverRoomKey, roomId.toString())
+
+            logger.info("No users left in room $roomId on this server. Unsubscribed and removed from Redis set $serverRoomKey.")
         }
     }
 
@@ -134,42 +155,6 @@ class WebSocketSessionManager(
         userSession.remove(userId)
     }
 
-    private fun sendMessageSafely(
-        isMember: Boolean,
-        session: MutableSet<WebSocketSession>,
-        json: String,
-        roomId: Long,
-        userId: Long
-    ) {
-        if (isMember) {
-            val closedSessions = mutableSetOf<WebSocketSession>()
-
-            session.forEach { s ->
-                processMessageSending(s, json, closedSessions, roomId)
-            }
-
-            if (closedSessions.isNotEmpty()) {
-                session.removeAll(closedSessions)
-            }
-            return
-        }
-
-        logger.debug("not member of $roomId for $userId")
-
-    }
-
-    private fun processMessageSending(
-        s: WebSocketSession,
-        json: String,
-        closedSessions: MutableSet<WebSocketSession>,
-        roomId: Long
-    ) {
-        if (!sendMessage(s, json)) {
-            closedSessions.add(s)
-        }
-        logger.info("Sending message to local room $roomId")
-    }
-
     private fun deleteRoomIfNoConnectedUsers() {
 
         val serverId = redisMessageBroker.getServerId()
@@ -183,23 +168,6 @@ class WebSocketSessionManager(
 
         redisTemplate.delete(serverRoomKey)
         logger.info("Removed $subscribedRooms")
-    }
-
-    private fun sendMessage(
-        s: WebSocketSession,
-        json: String,
-    ): Boolean {
-        return if (s.isOpen) {
-            try {
-                s.sendMessage(TextMessage(json))
-                true
-            } catch (e: Exception) {
-                logger.error(e.message, e)
-                false
-            }
-        } else {
-            false
-        }
     }
 
     fun existJoiningRoomAlready(roomId: Long, userId: Long): Boolean {

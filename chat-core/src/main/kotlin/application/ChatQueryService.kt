@@ -9,7 +9,7 @@ interface ChatQueryService {
 
     fun getChatRoom(roomId: Long): ChatRoomDto
     fun getChatRooms(userId: Long, pageable: Pageable): Page<ChatRoomDto>
-    fun searchChatRooms(query: String, userId: Long): List<ChatRoomDto>
+    fun searchChatRooms(query: String): List<ChatRoomDto>
     fun getChatRoomMembers(roomId: Long): List<ChatRoomMemberDto>
     fun getMessages(roomId: Long, userId: Long, pageable: Pageable): Page<MessageDto>
     fun getMessagesByCursor(request: MessagePageRequest, userId: Long): MessagePageResponse

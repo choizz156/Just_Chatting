@@ -3,6 +3,7 @@ package com.chat.persistence.application
 import application.Validator
 import com.chat.core.application.ChatQueryService
 import com.chat.core.domain.entity.ChatRoomMember
+import com.chat.core.domain.entity.Message
 import com.chat.core.dto.*
 import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.chat.persistence.repository.ChatRoomRepository
@@ -34,27 +35,24 @@ class ChatQueryServiceV1(
         pageable: Pageable
     ): Page<ChatRoomDto> {
         return chatRoomRepository.findUserChatRoom(userId, pageable)
-            .map { dtoConverter.chatRoomToDto(it) }
+            .map(dtoConverter::chatRoomToDto)
     }
 
     override fun searchChatRooms(
-        query: String,
-        userId: Long
+        query: String
     ): List<ChatRoomDto> {
-        if (query.isBlank()) {
-            return chatRoomRepository.findByIsActiveTrueOrderByCreatedAtDesc()
-                .map { dtoConverter.chatRoomToDto(it) }
+        val chatRooms = if (query.isBlank()) {
+            chatRoomRepository.findByIsActiveTrueOrderByCreatedAtDesc()
+        } else {
+            chatRoomRepository.findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc(query)
         }
-        return chatRoomRepository.findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc(
-            query
-        ).map { dtoConverter.chatRoomToDto(it) }
+        return chatRooms.map(dtoConverter::chatRoomToDto)
     }
-
 
     @Cacheable(value = ["chatRoomMembers"], key = "#roomId")
     override fun getChatRoomMembers(roomId: Long): List<ChatRoomMemberDto> {
         return chatRoomMemberRepository.findByChatRoomIdAndIsActiveTrue(roomId)
-            .map { memberToDto(it) }
+            .map(this::memberToDto)
     }
 
     override fun getMessages(
@@ -65,48 +63,46 @@ class ChatQueryServiceV1(
         validator.isNotChatRoomMemeber(roomId, userId)
 
         return messageRepository.findByChatRoomId(roomId, pageable)
-            .map { dtoConverter.messageToDto(it) }
+            .map(dtoConverter::messageToDto)
     }
 
     override fun getMessagesByCursor(
         request: MessagePageRequest,
         userId: Long
     ): MessagePageResponse {
+
         validator.isNotChatRoomMemeber(request.chatRoomId, userId)
 
         val pageable = PageRequest.of(0, request.limit)
-        val cursor = request.cursor
+        val messages = findMessagesWithCursor(request, pageable)
 
-        val messages = when {
-            cursor == null -> {
+        return buildCursorResponse(messages, request.cursor, request.limit)
+    }
+
+    private fun findMessagesWithCursor(request: MessagePageRequest, pageable: Pageable): List<Message> {
+        return when {
+            request.cursor == null ->
                 messageRepository.findLatestMessages(request.chatRoomId, pageable)
-            }
 
-            request.direction == MessageDirection.BEFORE -> {
-                messageRepository.findMessagesBefore(request.chatRoomId, cursor, pageable)
-            }
+            request.direction == MessageDirection.BEFORE ->
+                messageRepository.findMessagesBefore(request.chatRoomId, request.cursor!! , pageable)
 
-            else -> {
-                messageRepository.findMessagesAfter(request.chatRoomId, cursor, pageable)
-            }
+            else ->
+                messageRepository.findMessagesAfter(request.chatRoomId, request.cursor!!, pageable)
         }
+    }
 
-        val messagesDtos = messages.map { dtoConverter.messageToDto(it) }
+    private fun buildCursorResponse(messages: List<Message>, cursor: Long?, limit: Int): MessagePageResponse {
 
-        val nextCursor = if (messagesDtos.isNotEmpty()) messagesDtos.last().id else null
-        val prevCursor = if (messagesDtos.isNotEmpty()) messagesDtos.first().id else null
-
-        val hasNext = messages.size == request.limit
-        val hasPrev = cursor != null
+        val messagesDtos = messages.map(dtoConverter::messageToDto)
 
         return MessagePageResponse(
             messages = messagesDtos,
-            nextCursor = nextCursor,
-            prevCursor = prevCursor,
-            hasNext = hasNext,
-            hasPrev = hasPrev,
+            nextCursor = messagesDtos.lastOrNull()?.id,
+            prevCursor = messagesDtos.firstOrNull()?.id,
+            hasNext = messages.size == limit,
+            hasPrev = cursor != null
         )
-
     }
 
     private fun memberToDto(member: ChatRoomMember): ChatRoomMemberDto {
