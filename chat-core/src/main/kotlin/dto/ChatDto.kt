@@ -1,5 +1,6 @@
 package com.chat.core.dto
 
+import com.chat.core.application.dto.UserDto
 import com.chat.core.domain.entity.ChatRoomType
 import com.chat.core.domain.entity.MemberRole
 import com.chat.core.domain.entity.MessageType

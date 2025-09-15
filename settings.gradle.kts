@@ -2,8 +2,9 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
-rootProject.name = "algo_chat"
+rootProject.name = "just_chat"
 
 include("chat-application",
     "chat-core",
-    "chat-persistence")
+    "chat-persistence",
+    "chat-api", "chat-auth")

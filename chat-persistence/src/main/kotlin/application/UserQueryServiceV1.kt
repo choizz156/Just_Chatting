@@ -1,7 +1,7 @@
 package com.chat.persistence.application
 
 import com.chat.core.application.UserQueryService
-import com.chat.core.dto.UserDto
+import com.chat.core.application.dto.UserDto
 import com.chat.persistence.repository.UserRepository
 import com.chat.persistence.repository.findByIdOrThrow
 import org.springframework.data.domain.Page

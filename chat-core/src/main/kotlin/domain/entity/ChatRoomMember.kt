@@ -1,8 +1,8 @@
 package com.chat.core.domain.entity
 
+import domain.entity.BaseEntity
 import jakarta.persistence.*
 import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
 
 @Entity
@@ -18,7 +18,6 @@ import java.time.LocalDateTime
         Index(name = "idx_chat_room_member_role", columnList = "role")
     ]
 )
-@EntityListeners(AuditingEntityListener::class)
 data class ChatRoomMember(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,11 +46,7 @@ data class ChatRoomMember(
 
     @Column
     val leftAt: LocalDateTime? = null,
-
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    var createdAt: LocalDateTime = LocalDateTime.now()
-)
+): BaseEntity()
 
 enum class MemberRole {
     OWNER,

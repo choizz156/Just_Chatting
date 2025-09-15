@@ -1,15 +1,12 @@
 package com.chat.core.domain.entity
 
+import domain.entity.BaseEntity
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
 
 @Entity
 @Table(name = "app_users")
-@EntityListeners(AuditingEntityListener::class)
 data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,11 +34,13 @@ data class User(
     @Column
     val lastSeenAt: LocalDateTime? = null,
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    var createdAt: LocalDateTime = LocalDateTime.now(),
+): BaseEntity()
 
-    @LastModifiedDate
-    @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now()
-)
+enum class UserStatus {
+    ACTIVE, WITH_DRAW;
+}
+
+enum class UserRole{
+    USER, ADMIN, HOST, GUEST;
+}
+

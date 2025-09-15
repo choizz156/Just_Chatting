@@ -2,12 +2,10 @@ package com.chat.persistence.application
 
 import com.chat.core.application.UserService
 import com.chat.core.application.Validator
+import com.chat.core.application.dto.CreateUserContext
+import com.chat.core.application.dto.UserDto
 import com.chat.core.domain.entity.User
-import com.chat.core.dto.CreateUserRequest
-import com.chat.core.dto.LoginRequest
-import com.chat.core.dto.UserDto
 import com.chat.persistence.repository.UserRepository
-import com.chat.persistence.repository.findByUsernameOrThrow
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
@@ -20,7 +18,7 @@ class UserServiceV1(
     private val dtoConverter: DtoConverter,
     private val validator: Validator
 ) : UserService {
-    override fun createUser(request: CreateUserRequest): UserDto {
+    override fun createUser(request: CreateUserContext): UserDto {
         validator.checkUsername(request.username)
 
         val user = User(
@@ -33,15 +31,15 @@ class UserServiceV1(
         return dtoConverter.userToDto(savedUser)
     }
 
-    override fun login(request: LoginRequest): UserDto {
-        val user = userRepository.findByUsernameOrThrow(request.username)
-
-        if (user.password != hashPassword(request.password)) {
-            throw IllegalArgumentException("이메일이나 비밀번호를 확인해주세요")
-        }
-
-        return dtoConverter.userToDto(user)
-    }
+//    override fun login(request: LoginRequest): UserDto {
+//        val user = userRepository.findByUsernameOrThrow(request.username)
+//
+//        if (user.password != hashPassword(request.password)) {
+//            throw IllegalArgumentException("이메일이나 비밀번호를 확인해주세요")
+//        }
+//
+//        return dtoConverter.userToDto(user)
+//    }
 
     private fun hashPassword(password: String): String {
         val bytes =

@@ -1,12 +1,12 @@
 package com.chat.persistence.application
 
+import com.chat.core.application.dto.UserDto
 import com.chat.core.domain.entity.ChatRoom
 import com.chat.core.domain.entity.Message
 import com.chat.core.domain.entity.User
 import com.chat.core.dto.ChatMessage
 import com.chat.core.dto.ChatRoomDto
 import com.chat.core.dto.MessageDto
-import com.chat.core.dto.UserDto
 import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.chat.persistence.repository.MessageRepository
 import org.springframework.cache.annotation.Cacheable
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 class DtoConverter(
     private val chatRoomMemberRepository: ChatRoomMemberRepository,
     private val messageRepository: MessageRepository,
-){
+) {
     @Cacheable(value = ["chatRooms"], key = "#chatRoom.id")
     fun chatRoomToDto(chatRoom: ChatRoom): ChatRoomDto {
         val memberCount = chatRoomMemberRepository.countActiveMembersInRoom(chatRoom.id).toInt()

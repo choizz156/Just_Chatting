@@ -1,21 +1,9 @@
-package com.chat.core.application.dto
+package com.chat.api.user
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
-import java.time.LocalDateTime
 
-data class UserDto(
-    val id: Long,
-    val username: String,
-    val displayName: String,
-    val profileImageUrl: String?,
-    val status: String?,
-    val isActive: Boolean,
-    val lastSeenAt: LocalDateTime?,
-    val createdAt: LocalDateTime
-)
-
-data class CreateUserContext(
+data class CreateUserRequest(
     @field:NotBlank(message = "사용자명은 필수입니다")
     @field:Size(min = 3, max = 20, message = "사용자명은 3-20자 사이여야 합니다")
     val username: String,
@@ -29,7 +17,7 @@ data class CreateUserContext(
     val displayName: String
 )
 
-data class LoginContext(
+data class LoginRequest(
     @field:NotBlank(message = "사용자명은 필수입니다")
     val username: String,
 

@@ -1,11 +1,8 @@
 package com.chat.core.domain.entity
 
+import domain.entity.BaseEntity
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import java.time.LocalDateTime
 
 @Entity
 @Table(
@@ -16,7 +13,6 @@ import java.time.LocalDateTime
         Index(name = "idx_chat_room_active", columnList = "is_active")
     ]
 )
-@EntityListeners(AuditingEntityListener::class)
 data class ChatRoom(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,15 +42,7 @@ data class ChatRoom(
     @JoinColumn(name = "created_by", nullable = false)
     val createdBy: User,
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    var createdAt: LocalDateTime = LocalDateTime.now(),
-
-    @LastModifiedDate
-    @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now()
-
-)
+): BaseEntity()
 
 enum class ChatRoomType {
     DIRECT,

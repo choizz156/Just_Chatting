@@ -1,11 +1,10 @@
 package com.chat.core.application
 
-import com.chat.core.dto.CreateUserRequest
-import com.chat.core.dto.LoginRequest
-import com.chat.core.dto.UserDto
+import com.chat.core.application.dto.CreateUserContext
+import com.chat.core.application.dto.UserDto
 
 interface UserService {
 
-    fun createUser(request: CreateUserRequest): UserDto
-    fun login(request: LoginRequest): UserDto
+    fun createUser(request: CreateUserContext): UserDto
+//    fun login(request: LoginContext): UserDto
 }

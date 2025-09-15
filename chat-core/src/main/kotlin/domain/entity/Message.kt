@@ -1,8 +1,7 @@
 package com.chat.core.domain.entity
 
+import domain.entity.BaseEntity
 import jakarta.persistence.*
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
 
 @Entity
@@ -16,7 +15,6 @@ import java.time.LocalDateTime
         Index(name = "idx_message_room_sequence", columnList = "chat_room_id,sequence_number")
     ]
 )
-@EntityListeners(AuditingEntityListener::class)
 data class Message(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,15 +42,11 @@ data class Message(
     val isDeleted: Boolean = false,
 
     @Column(nullable = false)
-    val sequenceNumber: Long = 0,
-
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    var createdAt: LocalDateTime = LocalDateTime.now(),
+    val sequenceNumber: Long = 0L,
 
     @Column
     val editedAt: LocalDateTime? = null
-)
+) : BaseEntity()
 
 enum class MessageType {
     TEXT,

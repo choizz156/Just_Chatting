@@ -1,6 +1,6 @@
 package com.chat.core.application
 
-import com.chat.core.dto.UserDto
+import com.chat.core.application.dto.UserDto
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 
