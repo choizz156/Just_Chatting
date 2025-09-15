@@ -1,12 +1,13 @@
 package com.chat.persistence.application
 
-import application.Validator
 import com.chat.core.application.UserService
+import com.chat.core.application.Validator
 import com.chat.core.domain.entity.User
 import com.chat.core.dto.CreateUserRequest
 import com.chat.core.dto.LoginRequest
 import com.chat.core.dto.UserDto
 import com.chat.persistence.repository.UserRepository
+import com.chat.persistence.repository.findByUsernameOrThrow
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.security.MessageDigest

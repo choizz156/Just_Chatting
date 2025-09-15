@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 )
 @EnableJpaAuditing
 @EnableJpaRepositories(basePackages = ["com.chat.persistence.repository"])
-@EntityScan(basePackages = ["com.chat.domain.domain.entity"])
+@EntityScan(basePackages = ["com.chat.core.domain.entity"])
 class AlgoChatApplication
 
 fun main(args: Array<String>) {

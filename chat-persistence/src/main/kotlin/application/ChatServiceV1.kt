@@ -1,13 +1,14 @@
 package com.chat.persistence.application
 
-import application.Validator
 import com.chat.core.application.ChatService
+import com.chat.core.application.Validator
 import com.chat.core.domain.entity.*
 import com.chat.core.dto.*
 import com.chat.persistence.redis.RedisMessageBroker
 import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.chat.persistence.repository.ChatRoomRepository
 import com.chat.persistence.repository.UserRepository
+import com.chat.persistence.repository.findByIdOrThrow
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Caching

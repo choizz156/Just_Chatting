@@ -4,9 +4,10 @@ import com.chat.core.domain.entity.ChatRoomMember
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
-import java.util.Optional
+import org.springframework.stereotype.Repository
+import java.util.*
 
-
+@Repository
 interface ChatRoomMemberRepository: CrudRepository<ChatRoomMember, Long> {
 
     fun findByChatRoomIdAndIsActiveTrue(chatRoomId: Long): List<ChatRoomMember>

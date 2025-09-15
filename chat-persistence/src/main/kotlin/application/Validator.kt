@@ -1,4 +1,4 @@
-package application
+package com.chat.core.application
 
 import com.chat.persistence.application.WebSocketSessionManager
 import com.chat.persistence.repository.UserRepository

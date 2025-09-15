@@ -13,7 +13,7 @@ import java.time.LocalDateTime
     indexes = [
         Index(name = "idx_chat_room_created_by", columnList = "created_by"),
         Index(name = "idx_chat_room_type", columnList = "type"),
-        Index(name = "idx_chat_room_active", columnList = "active")
+        Index(name = "idx_chat_room_active", columnList = "is_active")
     ]
 )
 @EntityListeners(AuditingEntityListener::class)
