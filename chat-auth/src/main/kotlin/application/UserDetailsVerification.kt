@@ -1,0 +1,41 @@
+package com.chat.auth.application
+
+import CustomUserPrincipal
+import com.chat.core.domain.entity.UserRole
+import com.chat.persistence.repository.UserRepository
+import com.chat.persistence.repository.findByUsernameOrThrow
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.stereotype.Component
+
+@Component
+class UserDetailsVerification(
+    private val userRepository: UserRepository
+) : UserDetailsService {
+    override fun loadUserByUsername(username: String?): UserDetails? {
+        if (username == null) {
+            NullPointerException("이메일이 null입니다.")
+        }
+        val user = userRepository.findByUsernameOrThrow(username!!)
+
+        val userAttribute =
+            UserAttribute(
+                user.email,
+                user.nickname,
+                user.password,
+                user.id,
+                user.role
+            )
+
+        return CustomUserPrincipal(userAttribute)
+    }
+}
+
+
+data class UserAttribute(
+    val email: String,
+    val nickname: String,
+    val password: String,
+    val userId: Long,
+    val role: UserRole
+)

@@ -12,7 +12,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
     scanBasePackages = [
         "com.chat.app",
         "com.chat.core",
-        "com.chat.persistence"
+        "com.chat.persistence",
+        "com.chat.auth"
     ]
 )
 @EnableJpaAuditing

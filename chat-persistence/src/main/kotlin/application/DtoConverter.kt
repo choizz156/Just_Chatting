@@ -56,8 +56,8 @@ class DtoConverter(
     fun userToDto(user: User): UserDto {
         return UserDto(
             id = user.id,
-            username = user.username,
-            displayName = user.displayName,
+            username = user.email,
+            displayName = user.nickname,
             profileImageUrl = user.profileImageUrl,
             status = user.status,
             isActive = user.isActive,
@@ -73,7 +73,7 @@ class DtoConverter(
             type = savedMessage.type,
             chatRoomId = savedMessage.chatRoom.id,
             senderId = savedMessage.sender.id,
-            senderName = savedMessage.sender.displayName,
+            senderName = savedMessage.sender.nickname,
             sequenceNumber = savedMessage.sequenceNumber,
             timestamp = savedMessage.createdAt
         )

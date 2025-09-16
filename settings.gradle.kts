@@ -4,7 +4,10 @@ plugins {
 
 rootProject.name = "just_chat"
 
-include("chat-application",
+include(
+    "chat-application",
     "chat-core",
     "chat-persistence",
-    "chat-api", "chat-auth")
+    "chat-api",
+    "chat-auth"
+)

@@ -15,6 +15,8 @@ dependencyManagement {
 dependencies {
     implementation(project(":chat-core"))
     implementation(project(":chat-persistence"))
+    implementation(project(":chat-auth"))
+
 
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-actuator")

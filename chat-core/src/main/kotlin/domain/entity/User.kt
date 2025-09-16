@@ -14,13 +14,13 @@ data class User(
 
     @Column(unique = true, nullable = false, length = 50)
     @NotBlank
-    val username: String,
+    val email: String,
 
     @Column(nullable = false, length = 255)
     val password: String,
 
     @Column(nullable = false, length = 100)
-    val displayName: String,
+    val nickname: String,
 
     @Column(length = 500)
     val profileImageUrl: String? = null,
@@ -34,7 +34,13 @@ data class User(
     @Column
     val lastSeenAt: LocalDateTime? = null,
 
-): BaseEntity()
+    @Enumerated(EnumType.STRING)
+    val role: UserRole = UserRole.USER,
+
+    @Enumerated
+    val userStatus: UserStatus = UserStatus.ACTIVE,
+
+    ): BaseEntity()
 
 enum class UserStatus {
     ACTIVE, WITH_DRAW;

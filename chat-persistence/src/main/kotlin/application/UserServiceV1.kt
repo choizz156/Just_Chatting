@@ -22,9 +22,9 @@ class UserServiceV1(
         validator.checkUsername(request.username)
 
         val user = User(
-            username = request.username,
+            email = request.username,
             password = hashPassword(request.password),
-            displayName = request.displayName
+            nickname = request.displayName
         )
 
         val savedUser = userRepository.save(user)

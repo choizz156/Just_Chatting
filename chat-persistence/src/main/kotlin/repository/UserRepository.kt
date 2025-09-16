@@ -22,8 +22,8 @@ interface UserRepository : JpaRepository<User, Long> {
 
     @Query(
         "SELECT u FROM User  u WHERE " +
-                "lower(u.username) like lower(concat('%',:query, '%')) or " +
-                "lower(u.displayName) like lower(concat('%', :query, '%'))"
+                "lower(u.email) like lower(concat('%',:query, '%')) or " +
+                "lower(u.nickname) like lower(concat('%', :query, '%'))"
     )
     fun searchUsers(query: String, pageable: Pageable): Page<User>
 }
