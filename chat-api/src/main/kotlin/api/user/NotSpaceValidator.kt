@@ -4,12 +4,15 @@ import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
 
 
-class NotSpaceValidator() : ConstraintValidator<NotSpace, String> {
+class NotSpaceValidator : ConstraintValidator<NotSpace, String> {
     override fun isValid(
         value: String?,
         context: ConstraintValidatorContext?
     ): Boolean {
-        return hasWhitespace(value!!) && !value.isEmpty()
+        if (value == null) {
+            return true
+        }
+        return hasWhitespace(value) && value.isNotEmpty()
     }
 
     override fun initialize(constraintAnnotation: NotSpace?) {
@@ -17,12 +20,6 @@ class NotSpaceValidator() : ConstraintValidator<NotSpace, String> {
     }
 
     fun hasWhitespace(str: String): Boolean {
-
-        str.toCharArray().forEach {
-            if(Character.isWhitespace(it)) {
-                return false
-            }
-        }
-        return true
+        return str.none { Character.isWhitespace(it) }
     }
 }
