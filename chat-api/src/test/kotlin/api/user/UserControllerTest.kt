@@ -69,10 +69,28 @@ class UserControllerTest(
     }
 
     @Test
-    fun `join fail - blank email`() {
+    fun ` blank email`() {
         // given
         val request = CreateUserRequest(
             email = "3423mek",
+            password = "password",
+            displayName = "testUser"
+        )
+
+        // when & then
+        mockMvc.post("/users") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isBadRequest() }
+        }.andDo { print() }
+    }
+
+    @Test
+    fun `Space email`() {
+        // given
+        val request = CreateUserRequest(
+            email = "test11@ test.com",
             password = "password",
             displayName = "testUser"
         )
