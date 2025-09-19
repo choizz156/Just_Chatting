@@ -56,11 +56,12 @@ class DtoConverter(
     fun userToDto(user: User): UserDto {
         return UserDto(
             id = user.id,
-            username = user.email,
-            displayName = user.nickname,
+            email = user.email,
+            nickname = user.nickname,
             profileImageUrl = user.profileImageUrl,
             status = user.status,
             isActive = user.isActive,
+            roles = user.role,
             lastSeenAt = user.lastSeenAt,
             createdAt = user.createdAt
         )

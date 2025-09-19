@@ -58,7 +58,7 @@ class ChatServiceV1(
         val chatRoom = chatRoomRepository.findByIdOrThrow(roomId)
         val user = userRepository.findByIdOrThrow(userId)
 
-        validator.isChatRoomMemeberAlready(roomId, userId)
+        validator.isChatRoomMemberAlready(roomId, userId)
 
         val member = ChatRoomMember(
             chatRoom = chatRoom,
@@ -90,7 +90,7 @@ class ChatServiceV1(
         senderId: Long
     ): MessageDto {
 
-        validator.isNotChatRoomMemeber(request.chatRoomId, senderId)
+        validator.isNotChatRoomMember(request.chatRoomId, senderId)
 
         val savedMessage = saveMessage(request, senderId)
         val chatMessage = dtoConverter.toChatMessage(savedMessage)

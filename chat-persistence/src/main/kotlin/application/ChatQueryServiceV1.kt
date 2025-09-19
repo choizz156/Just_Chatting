@@ -61,7 +61,7 @@ class ChatQueryServiceV1(
         userId: Long,
         pageable: Pageable
     ): Page<MessageDto> {
-        validator.isNotChatRoomMemeber(roomId, userId)
+        validator.isNotChatRoomMember(roomId, userId)
 
         return messageRepository.findByChatRoomId(roomId, pageable)
             .map(dtoConverter::messageToDto)
@@ -72,7 +72,7 @@ class ChatQueryServiceV1(
         userId: Long
     ): MessagePageResponse {
 
-        validator.isNotChatRoomMemeber(request.chatRoomId, userId)
+        validator.isNotChatRoomMember(request.chatRoomId, userId)
 
         val pageable = PageRequest.of(0, request.limit)
         val messages = findMessagesWithCursor(request, pageable)

@@ -24,6 +24,6 @@ class UserController(
     }
 
     fun toContext(request: CreateUserRequest): CreateUserContext {
-        return CreateUserContext(request.username, request.password, request.displayName)
+        return CreateUserContext(request.email, request.password, request.displayName)
     }
 }

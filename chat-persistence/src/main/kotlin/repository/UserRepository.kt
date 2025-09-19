@@ -12,9 +12,10 @@ import java.time.LocalDateTime
 @Repository
 interface UserRepository : JpaRepository<User, Long> {
 
-    fun findByUsername(username: String): User?
+    fun findByEmail(email: String): User?
 
-    fun existsByUsername(username: String): Boolean
+    fun existsByEmail(email: String): Boolean
+    fun existsByNickname(nickname: String): Boolean
 
     @Modifying
     @Query("UPDATE User u SET u.lastSeenAt = :lastSeenAt WHERE u.id = :userId")
@@ -28,8 +29,8 @@ interface UserRepository : JpaRepository<User, Long> {
     fun searchUsers(query: String, pageable: Pageable): Page<User>
 }
 
-fun UserRepository.findByUsernameOrThrow(username: String): User =
-    findByUsername(username) ?: throw IllegalArgumentException("이메일이나 비밀번호를 확인해주세요")
+fun UserRepository.findByUsernameOrThrow(email: String): User =
+    findByEmail(email) ?: throw IllegalArgumentException("이메일이나 비밀번호를 확인해주세요")
 
 fun UserRepository.findByIdOrThrow(userId: Long): User =
     findById(userId).orElseThrow { IllegalArgumentException("사용자를 찾을 수 없습니다: $userId") }

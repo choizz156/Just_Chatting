@@ -7,8 +7,8 @@ import com.chat.core.application.dto.UserDto
 import com.chat.core.domain.entity.User
 import com.chat.persistence.repository.UserRepository
 import jakarta.transaction.Transactional
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.security.MessageDigest
 
 
 @Service
@@ -16,15 +16,18 @@ import java.security.MessageDigest
 class UserServiceV1(
     private val userRepository: UserRepository,
     private val dtoConverter: DtoConverter,
+    private val passwordEncoder: PasswordEncoder,
     private val validator: Validator
 ) : UserService {
+
     override fun createUser(request: CreateUserContext): UserDto {
-        validator.checkUsername(request.username)
+        validator.checkEmail(request.email)
+        validator.checkNickname(request.nickname)
 
         val user = User(
-            email = request.username,
-            password = hashPassword(request.password),
-            nickname = request.displayName
+            email = request.email,
+            password = passwordEncoder.encode(request.password),
+            nickname = request.nickname
         )
 
         val savedUser = userRepository.save(user)
@@ -41,9 +44,4 @@ class UserServiceV1(
 //        return dtoConverter.userToDto(user)
 //    }
 
-    private fun hashPassword(password: String): String {
-        val bytes =
-            MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
-    }
 }
