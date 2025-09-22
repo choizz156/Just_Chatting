@@ -40,13 +40,13 @@ data class User(
     @Enumerated
     val userStatus: UserStatus = UserStatus.ACTIVE,
 
-    ): BaseEntity()
+    ) : BaseEntity()
 
 enum class UserStatus {
     ACTIVE, WITH_DRAW;
 }
 
-enum class UserRole{
+enum class UserRole {
     USER, ADMIN, HOST, GUEST;
 }
 

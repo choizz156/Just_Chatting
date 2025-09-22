@@ -17,7 +17,7 @@ class DtoConverter(
     private val chatRoomMemberRepository: ChatRoomMemberRepository,
     private val messageRepository: MessageRepository,
 ) {
-    @Cacheable(value = ["chatRooms"], key = "#chatRoom.id")
+//    @Cacheable(value = ["chatRooms"], key = "#chatRoom.id")
     fun chatRoomToDto(chatRoom: ChatRoom): ChatRoomDto {
         val memberCount = chatRoomMemberRepository.countActiveMembersInRoom(chatRoom.id).toInt()
         val lastMessage = messageRepository.findLatestMessage(chatRoom.id)?.let { messageToDto(it) }

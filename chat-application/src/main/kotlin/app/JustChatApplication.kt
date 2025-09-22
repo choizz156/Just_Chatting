@@ -13,15 +13,17 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
         "com.chat.app",
         "com.chat.core",
         "com.chat.persistence",
-        "com.chat.auth"
+        "com.chat.auth",
+        "com.chat.api",
+        "com.chat.websocket",
     ]
 )
 @EnableJpaAuditing
 @EnableJpaRepositories(basePackages = ["com.chat.persistence.repository"])
 @EntityScan(basePackages = ["com.chat.core.domain.entity"])
 @EntityListeners(AuditingEntityListener::class)
-class AlgoChatApplication
+class JustChatApplication
 
 fun main(args: Array<String>) {
-    runApplication<AlgoChatApplication>(*args)
+    runApplication<JustChatApplication>(*args)
 }

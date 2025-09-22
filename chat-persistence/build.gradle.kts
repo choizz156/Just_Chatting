@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":chat-core"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("com.github.codemonstur:embedded-redis:1.4.3")
 
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -29,4 +30,6 @@ dependencies {
 
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
+    testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter-kotlin:1.1.15")
+
 }

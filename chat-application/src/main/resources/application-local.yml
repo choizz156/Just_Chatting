@@ -1,0 +1,82 @@
+spring:
+
+  # PostgreSQL 데이터베이스
+  datasource:
+    url:
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6380
+
+    # 캐시 설정
+  cache:
+    type: redis
+    redis:
+      time-to-live: 30m
+      cache-null-values: false
+
+server:
+  port: 8081
+  tomcat:
+    threads:
+      max: 300
+      min-spare: 20
+    connection-timeout: 20000
+    max-connections: 8192
+    accept-count: 100
+
+# 로깅 설정
+logging:
+  level:
+    com.chat: INFO
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.cache: INFO
+
+# 액추에이터 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,caches
+      cors:
+        allowed-origins: "*"
+        allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+        allowed-headers: "*"
+        max-age: 3600
+  endpoint:
+    health:
+      show-details: always
+
+# 커스텀 설정 @Value
+chat:
+  message:
+    sequence:
+      ttl-hours: 24
+    pagination:
+      max-limit: 100
+      default-limit: 50
+  cache:
+    default-ttl: 30m
+    users-ttl: 1h
+    messages-ttl: 5m

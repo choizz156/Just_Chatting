@@ -9,5 +9,6 @@ include(
     "chat-core",
     "chat-persistence",
     "chat-api",
-    "chat-auth"
+    "chat-auth",
+    "chat-websocket",
 )

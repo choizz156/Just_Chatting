@@ -4,9 +4,7 @@ import com.chat.core.application.dto.UserDto
 import com.chat.core.domain.entity.ChatRoomType
 import com.chat.core.domain.entity.MemberRole
 import com.chat.core.domain.entity.MessageType
-import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Size
 import java.time.LocalDateTime
 
 data class ChatRoomDto(
@@ -23,14 +21,11 @@ data class ChatRoomDto(
     val lastMessage: MessageDto?
 )
 
-data class CreateChatRoomRequest(
-    @field:NotBlank(message = "채팅방 이름은 필수입니다")
-    @field:Size(min = 1, max = 100, message = "채팅방 이름은 1-100자 사이여야 합니다")
+data class ChatRoomContext(
     val name: String,
 
     val description: String?,
 
-    @field:NotNull(message = "채팅방 타입은 필수입니다")
     val type: ChatRoomType,
 
     val imageUrl: String?,

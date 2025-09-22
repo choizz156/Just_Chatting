@@ -16,6 +16,8 @@ dependencies {
     implementation(project(":chat-core"))
     implementation(project(":chat-persistence"))
     implementation(project(":chat-auth"))
+    implementation(project(":chat-api"))
+    implementation(project(":chat-websocket"))
 
 
     implementation("org.springframework.boot:spring-boot-starter")

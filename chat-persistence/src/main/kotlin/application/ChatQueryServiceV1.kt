@@ -11,6 +11,7 @@ import com.chat.persistence.repository.MessageRepository
 import com.chat.persistence.repository.findByIdOrThrow
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -35,8 +36,11 @@ class ChatQueryServiceV1(
         userId: Long,
         pageable: Pageable
     ): Page<ChatRoomDto> {
-        return chatRoomRepository.findUserChatRoom(userId, pageable)
-            .map(dtoConverter::chatRoomToDto)
+        val chatRoomPage = chatRoomRepository.findUserChatRoom(userId, pageable)
+        val chatRoomList = chatRoomPage.content.map { it ->
+            dtoConverter.chatRoomToDto(it)
+        }
+        return PageImpl(chatRoomList, pageable, chatRoomPage.totalElements)
     }
 
     override fun searchChatRooms(
@@ -45,7 +49,9 @@ class ChatQueryServiceV1(
         val chatRooms = if (query.isBlank()) {
             chatRoomRepository.findByIsActiveTrueOrderByCreatedAtDesc()
         } else {
-            chatRoomRepository.findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc(query)
+            chatRoomRepository.findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc(
+                query
+            )
         }
         return chatRooms.map(dtoConverter::chatRoomToDto)
     }
@@ -80,20 +86,27 @@ class ChatQueryServiceV1(
         return buildCursorResponse(messages, request.cursor, request.limit)
     }
 
-    private fun findMessagesWithCursor(request: MessagePageRequest, pageable: Pageable): List<Message> {
+    private fun findMessagesWithCursor(
+        request: MessagePageRequest,
+        pageable: Pageable
+    ): List<Message> {
         return when {
             request.cursor == null ->
                 messageRepository.findLatestMessages(request.chatRoomId, pageable)
 
             request.direction == MessageDirection.BEFORE ->
-                messageRepository.findMessagesBefore(request.chatRoomId, request.cursor!! , pageable)
+                messageRepository.findMessagesBefore(request.chatRoomId, request.cursor!!, pageable)
 
             else ->
                 messageRepository.findMessagesAfter(request.chatRoomId, request.cursor!!, pageable)
         }
     }
 
-    private fun buildCursorResponse(messages: List<Message>, cursor: Long?, limit: Int): MessagePageResponse {
+    private fun buildCursorResponse(
+        messages: List<Message>,
+        cursor: Long?,
+        limit: Int
+    ): MessagePageResponse {
 
         val messagesDtos = messages.map(dtoConverter::messageToDto)
 

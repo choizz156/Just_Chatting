@@ -32,7 +32,7 @@ class ChatServiceV1(
 
     @CacheEvict(value = ["chatRooms"], allEntries = true)
     override fun createChatRoom(
-        request: CreateChatRoomRequest,
+        request: ChatRoomContext,
         createdBy: Long
     ): ChatRoomDto {
         val creator = userRepository.findByIdOrThrow(createdBy)
@@ -158,7 +158,7 @@ class ChatServiceV1(
     }
 
     private fun saveChatRoom(
-        request: CreateChatRoomRequest,
+        request: ChatRoomContext,
         creator: User
     ): ChatRoom {
         val chatRoom = ChatRoom(

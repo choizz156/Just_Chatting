@@ -30,7 +30,6 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 @Configuration
 class SecurityConfig(
     private val objectMapper: ObjectMapper,
-    private val passwordEncoder: PasswordEncoder,
     private val userDetailsVerification: UserDetailsVerification,
 ) {
 
@@ -115,7 +114,7 @@ class SecurityConfig(
     fun authenticationManager(): AuthenticationManager {
         val provider = DaoAuthenticationProvider()
         provider.setUserDetailsService(userDetailsVerification)
-        provider.setPasswordEncoder(passwordEncoder)
+        provider.setPasswordEncoder(passwordEncoder())
         return ProviderManager(provider);
     }
 }
