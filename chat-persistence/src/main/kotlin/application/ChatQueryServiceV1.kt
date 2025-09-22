@@ -27,6 +27,7 @@ class ChatQueryServiceV1(
     private val validator: Validator
 ) : ChatQueryService {
 
+    @Cacheable(value = ["chatRooms"], key = "#roomId")
     override fun getChatRoom(roomId: Long): ChatRoomDto {
         val chatRoom = chatRoomRepository.findByIdOrThrow(roomId)
         return dtoConverter.chatRoomToDto(chatRoom)
