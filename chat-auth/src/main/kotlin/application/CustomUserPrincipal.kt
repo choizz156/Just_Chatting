@@ -1,4 +1,5 @@
-import com.chat.auth.application.UserAttribute
+package com.chat.auth.application
+
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails

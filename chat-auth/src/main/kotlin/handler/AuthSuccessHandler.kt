@@ -1,6 +1,6 @@
 package com.chat.auth.handler
 
-import CustomUserPrincipal
+import application.CustomUserPrincipal
 import com.chat.auth.dto.ApiResponseDto
 import com.chat.auth.dto.UserResponseDto
 import com.fasterxml.jackson.databind.ObjectMapper

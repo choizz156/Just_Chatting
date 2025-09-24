@@ -1,6 +1,5 @@
 package com.chat.auth.application
 
-import CustomUserPrincipal
 import com.chat.core.domain.entity.UserRole
 import com.chat.persistence.repository.UserRepository
 import com.chat.persistence.repository.findByUsernameOrThrow
