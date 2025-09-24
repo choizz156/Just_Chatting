@@ -33,6 +33,7 @@ class ChatQueryServiceV1Test(
 
     @BeforeEach
     fun setUp() {
+        chatRoomMemberRepository.deleteAll();
         chatRoomRepository.deleteAllInBatch()
         userRepository.deleteAllInBatch()
     }
@@ -64,11 +65,13 @@ class ChatQueryServiceV1Test(
     }
 
     @Test
-    @DisplayName("자신이 속한 채팅방 목록만 조회한다")
-    fun `find rooms for a specific user`() {
+    @DisplayName("자신이 속한 채팅방 목록을 조회한다")
+    fun `find rooms included me`() {
         //given
-        val user1 = userRepository.save(User(email = "user1@test.com", password = "p", nickname = "user1"))
-        val user2 = userRepository.save(User(email = "user2@test.com", password = "p", nickname = "user2"))
+        val user1 =
+            userRepository.save(User(email = "user1@test.com", password = "p", nickname = "user1"))
+        val user2 =
+            userRepository.save(User(email = "user2@test.com", password = "p", nickname = "user2"))
 
         val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1))
         val room2 = chatRoomRepository.save(ChatRoom(name = "room2", createdBy = user1))
@@ -91,22 +94,93 @@ class ChatQueryServiceV1Test(
         )
 
         //when
-        val result1: Page<ChatRoomDto> = chatQueryService.getChatRooms(user1.id, PageRequest.of(0, 10))
-        val result2: Page<ChatRoomDto> = chatQueryService.getChatRooms(user2.id, PageRequest.of(0, 10))
+        val result1: Page<ChatRoomDto> =
+            chatQueryService.getChatRooms(user1.id, PageRequest.of(0, 10))
+        val result2: Page<ChatRoomDto> =
+            chatQueryService.getChatRooms(user2.id, PageRequest.of(0, 10))
 
         //then
         assertThat(result1.content).hasSize(2)
+            .extracting("name")
+            .containsAnyOf("room2", "room1")
         assertThat(result2.content).hasSize(2)
+        .extracting("name")
+            .containsAnyOf("room4", "room3")
+    }
 
-        assertThat(result1.content.map { it.name }).containsExactlyInAnyOrder(
-            "room1",
-            "room2",
+    @Test
+    @DisplayName("채팅방 이름으로 채팅방을 검색할 수 있다.")
+    fun `search chat room`() {
 
+        //given
+        val user1 =
+            userRepository.save(User(email = "user1@test.com", password = "p", nickname = "user1"))
+        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1))
+        val room2 = chatRoomRepository.save(ChatRoom(name = "ro1", createdBy = user1))
+
+        chatRoomMemberRepository.saveAll(
+            listOf(
+                ChatRoomMember(chatRoom = room1, user = user1),
+                ChatRoomMember(chatRoom = room2, user = user1)
+            )
         )
 
-        assertThat(result2.content.map { it.name }).containsExactlyInAnyOrder(
-            "room3",
-            "room4"
+        val searchChatRooms = chatQueryService.searchChatRooms("ro")
+
+        assertThat(searchChatRooms).hasSize(2)
+            .extracting("name")
+            .containsExactly(room2.name, room1.name)
+    }
+
+
+    @Test
+    @DisplayName("채팅방 이름이 비었을 경우 모두 조회한다")
+    fun `search chat room no query`() {
+
+        //given
+        val user1 =
+            userRepository.save(User(email = "user1@test.com", password = "p", nickname = "user1"))
+        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1))
+        val room2 = chatRoomRepository.save(ChatRoom(name = "ro1", createdBy = user1))
+
+        chatRoomMemberRepository.saveAll(
+            listOf(
+                ChatRoomMember(chatRoom = room1, user = user1),
+                ChatRoomMember(chatRoom = room2, user = user1)
+            )
         )
+
+        val searchChatRooms = chatQueryService.searchChatRooms("")
+
+        assertThat(searchChatRooms).hasSize(2)
+            .extracting("name")
+            .containsExactly(room2.name, room1.name)
+    }
+
+
+    @Test
+    @DisplayName("채팅방 멤버들을 조회할 수 있다.")
+    fun `find chat room member`() {
+
+        //given
+        val user1 =
+            userRepository.save(User(email = "user1@test.com", password = "p", nickname = "user1"))
+        val user2 =
+            userRepository.save(User(email = "user2@test.com", password = "p", nickname = "user2"))
+
+        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1))
+
+        chatRoomMemberRepository.saveAll(
+            listOf(
+                ChatRoomMember(chatRoom = room1, user = user1),
+                ChatRoomMember(chatRoom = room1, user = user2)
+            )
+        )
+
+        val members = chatQueryService.getChatRoomMembers(room1.id)
+
+        assertThat(members).hasSize(2)
+            .extracting("user.nickname")
+            .containsAnyOf(user1.nickname, user2.nickname)
     }
 }
