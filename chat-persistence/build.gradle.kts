@@ -15,21 +15,31 @@ dependencies {
     implementation(project(":chat-core"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("com.github.codemonstur:embedded-redis:1.4.3")
 
+    //security password
+    implementation("org.springframework.security:spring-security-crypto")
+
+    //redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-cache")
 
+    //embedded redis
+    implementation("com.github.codemonstur:embedded-redis:1.4.3")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
 
-    implementation("org.springframework.security:spring-security-crypto")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
+    //mongo db
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+
+    // embeded mongoDB
+    implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.21.0")
+    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.21.0")
+    testImplementation("org.apache.commons:commons-lang3:3.18.0")
 
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
-    testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter-kotlin:1.1.15")
 
 }

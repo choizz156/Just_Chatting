@@ -12,7 +12,7 @@ import java.time.LocalDateTime
     property = "type"
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = ChatMessage::class, name = "CHAT_MESSAGE"),
+    JsonSubTypes.Type(value = ChatMessageDTO::class, name = "CHAT_MESSAGE"),
     JsonSubTypes.Type(value = ErrorMessage::class, name = "ERROR")
 )
 sealed class WebSocketMessage {
@@ -20,7 +20,7 @@ sealed class WebSocketMessage {
     abstract val timestamp: LocalDateTime
 }
 
-data class ChatMessage(
+data class ChatMessageDTO(
     val id: Long,
     val content: String,
     val type: MessageType,

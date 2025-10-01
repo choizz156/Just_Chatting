@@ -4,7 +4,7 @@ import com.chat.core.application.dto.UserDto
 import com.chat.core.domain.entity.ChatRoom
 import com.chat.core.domain.entity.Message
 import com.chat.core.domain.entity.User
-import com.chat.core.dto.ChatMessage
+import com.chat.core.dto.ChatMessageDTO
 import com.chat.core.dto.ChatRoomDto
 import com.chat.core.dto.MessageDto
 import com.chat.persistence.repository.ChatRoomMemberRepository
@@ -67,8 +67,8 @@ class DtoConverter(
         )
     }
 
-    fun toChatMessage(savedMessage: Message): ChatMessage {
-        return ChatMessage(
+    fun toChatMessage(savedMessage: Message): ChatMessageDTO {
+        return ChatMessageDTO(
             id = savedMessage.id,
             content = savedMessage.content ?: "",
             type = savedMessage.type,

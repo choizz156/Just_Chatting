@@ -46,6 +46,19 @@ data class MessageDto(
     val sequenceNumber: Long = 0
 )
 
+data class ChatMessageDto(
+    val id: Long,
+    val chatRoomId: Long,
+    val sender: UserDto,
+    val type: MessageType,
+    val content: String?,
+    val isEdited: Boolean,
+    val isDeleted: Boolean,
+    val createdAt: LocalDateTime,
+    val editedAt: LocalDateTime?,
+    val sequenceNumber: Long = 0
+)
+
 data class SendMessageRequest(
     @field:NotNull(message = "채팅방 ID는 필수입니다")
     val chatRoomId: Long,

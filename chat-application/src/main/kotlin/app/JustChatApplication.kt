@@ -7,6 +7,7 @@ import org.springframework.boot.runApplication
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 
 @SpringBootApplication(
     scanBasePackages = [
@@ -22,6 +23,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 @EnableJpaRepositories(basePackages = ["com.chat.persistence.repository"])
 @EntityScan(basePackages = ["com.chat.core.domain.entity"])
 @EntityListeners(AuditingEntityListener::class)
+@EnableMongoRepositories(basePackages = ["com.chat.persistence.repository"])
 class JustChatApplication
 
 fun main(args: Array<String>) {

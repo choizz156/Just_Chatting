@@ -1,6 +1,6 @@
 package com.chat.persistence.application
 
-import com.chat.core.dto.ChatMessage
+import com.chat.core.dto.ChatMessageDTO
 import com.chat.persistence.redis.RedisMessageBroker
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PostConstruct
@@ -101,7 +101,7 @@ class WebSocketSessionManager(
         logger.info("Joined $roomId for $userId $serverId to server $serverRoomKey")
     }
 
-    fun sendMessageToLocalRoom(roomId: Long, message: ChatMessage?, excludeUserId: Long? = null) {
+    fun sendMessageToLocalRoom(roomId: Long, message: ChatMessageDTO?, excludeUserId: Long? = null) {
 
         val sessionsInRoom = if(roomSessions[roomId].isNullOrEmpty()) return else roomSessions[roomId]!!
 

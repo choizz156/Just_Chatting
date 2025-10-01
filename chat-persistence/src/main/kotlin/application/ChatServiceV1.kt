@@ -4,6 +4,7 @@ import com.chat.core.application.ChatService
 import com.chat.core.application.Validator
 import com.chat.core.domain.entity.*
 import com.chat.core.dto.*
+import com.chat.core.dto.ChatMessageDTO
 import com.chat.persistence.redis.RedisMessageBroker
 import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.chat.persistence.repository.ChatRoomRepository
@@ -123,20 +124,20 @@ class ChatServiceV1(
 
     private fun publishMessage(
         request: SendMessageRequest,
-        chatMessage: ChatMessage
+        chatMessageDTO: com.chat.core.dto.ChatMessageDTO
     ) {
-        webSocketSessionManager.sendMessageToLocalRoom(request.chatRoomId, chatMessage)
-        broadcastMessage(request, chatMessage)
+        webSocketSessionManager.sendMessageToLocalRoom(request.chatRoomId, chatMessageDTO)
+        broadcastMessage(request, chatMessageDTO)
     }
 
     private fun broadcastMessage(
         request: SendMessageRequest,
-        chatMessage: ChatMessage
+        chatMessageDTO: ChatMessageDTO
     ) {
         try {
             redisMessageBroker.broadcastToRoom(
                 roomId = request.chatRoomId,
-                message = chatMessage,
+                message = chatMessageDTO,
                 excludeSeverId = redisMessageBroker.getServerId()
             )
         } catch (e: Exception) {

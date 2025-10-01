@@ -1,6 +1,6 @@
 package com.chat.persistence.redis
 
-import com.chat.core.dto.ChatMessage
+import com.chat.core.dto.ChatMessageDTO
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
@@ -24,7 +24,7 @@ class RedisMessageBroker(
     private val serverId = System.getenv("HOSTNAME") ?: "server-${System.currentTimeMillis()}"
     private val processedMessages = ConcurrentHashMap<String, Long>()
     private val subscribeRooms = ConcurrentHashMap.newKeySet<Long>()
-    private var localMessageHandler: ((Long, ChatMessage) -> Unit)? = null
+    private var localMessageHandler: ((Long, ChatMessageDTO) -> Unit)? = null
 
     fun getServerId() = serverId
 
@@ -54,7 +54,7 @@ class RedisMessageBroker(
         logger.info("Removing RedisMessageListenerContainer")
     }
 
-    fun setLocalMessageHandler(handler: (Long, ChatMessage) -> Unit) {
+    fun setLocalMessageHandler(handler: (Long, ChatMessageDTO) -> Unit) {
         this.localMessageHandler = handler
     }
 
@@ -114,7 +114,7 @@ class RedisMessageBroker(
         }
     }
 
-    fun broadcastToRoom(roomId: Long, message: ChatMessage, excludeSeverId: String? = null) {
+    fun broadcastToRoom(roomId: Long, message: ChatMessageDTO, excludeSeverId: String? = null) {
         try {
             val message = DistributedMessage(
                 id = "$serverId-${System.currentTimeMillis()}-${System.nanoTime()}",
@@ -153,6 +153,6 @@ class RedisMessageBroker(
         val roomId: Long,
         val excludeSeverId: String?,
         val timestamp: LocalDateTime,
-        val payload: ChatMessage
+        val payload: ChatMessageDTO
     )
 }
