@@ -10,6 +10,12 @@ spring:
         format_sql: true
     defer-datasource-initialization: on
 
+  data:
+    mongodb:
+      host: localhost
+      port: 0
+      database: test
+
   datasource:
     username: sa
     password:
@@ -28,3 +34,11 @@ logging:
   level:
     org.hibernate.sql: debug
     org.hibernate.orm.jdbc.bind: trace
+    org.springframework.data.mongodb: debug
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 4.4.0
+        tools-version: 100.8.0
