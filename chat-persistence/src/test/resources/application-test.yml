@@ -34,7 +34,7 @@ logging:
   level:
     org.hibernate.sql: debug
     org.hibernate.orm.jdbc.bind: trace
-    org.springframework.data.mongodb: debug
+    org.springframework.data.mongodb: trace
 
 de:
   flapdoodle:
