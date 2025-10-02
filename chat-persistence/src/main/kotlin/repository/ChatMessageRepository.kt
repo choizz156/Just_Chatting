@@ -10,9 +10,36 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ChatMessageRepository : MongoRepository<ChatMessage, String> {
 
+//    @Query(
+//        value =  "{'chatRoom.id': ?0, 'isDeleted': false}",
+//        sort = "{'_id': -1}"
+//    )
+//    fun findChatMessageByChatRoomId(chatRoomId: Long, pageable: Pageable): Page<ChatMessage>
+
     @Query(
-        value = "{ 'chatRoom.id': ?0, 'isDeleted': false }",
-        sort = "{ 'sequenceNumber': -1, 'createdAt': -1 }"
+        value = "{ 'chatRoomId': ?0, 'isDeleted': false, '_id': { '\$lt': ?1 } }",
+        sort = "{ '_id': -1 }"
     )
-    fun findChatMessagesBefore(chatRoomId: Long, cursor: Long, pageable: Pageable): List<ChatMessage>
+    fun findChatMessagesBefore(chatRoomId: Long, cursor: String, pageable: Pageable): List<ChatMessage>
+
+    @Query(
+        value = "{ 'chatRoomId': ?0, 'isDeleted': false, '_id': { '\$gt': ?1 } }",
+        sort = "{ '_id': 1 }"
+    )
+    fun findChatMessagesAfter(chatRoomId: Long, cursor: String, pageable: Pageable): List<ChatMessage>
+
+    @Query(
+        value =  "{'chatRoomId': ?0, 'isDeleted': false}",
+        sort = "{'_id': -1}"
+    )
+    fun findLatestMessages(chatRoomId: Long, pageable: Pageable): List<ChatMessage>
+
+
+    @Query(
+        value =  "{'chatRoomId': ?0, 'isDeleted': false}",
+        sort = "{'_id': -1}"
+    )
+    fun findLatestMessage(chatRoomId: Long): ChatMessage?
+
+
 }

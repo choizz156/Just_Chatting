@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 data class ChatMessage(
 
     @Id
-    val id: String = "",
+    val id: String? = null,
 
     val chatRoomId: Long,
 
