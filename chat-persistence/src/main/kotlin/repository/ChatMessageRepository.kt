@@ -32,7 +32,7 @@ interface ChatMessageRepository : MongoRepository<ChatMessage, String> {
         value =  "{'chatRoomId': ?0, 'isDeleted': false}",
         sort = "{'_id': -1}"
     )
-    fun findLatestMessages(chatRoomId: Long, pageable: Pageable): List<ChatMessage>
+    fun findLatestMessagesByChatRoomId(chatRoomId: Long, pageable: Pageable): List<ChatMessage>
 
 
     @Query(
@@ -40,6 +40,5 @@ interface ChatMessageRepository : MongoRepository<ChatMessage, String> {
         sort = "{'_id': -1}"
     )
     fun findLatestMessage(chatRoomId: Long): ChatMessage?
-
 
 }
