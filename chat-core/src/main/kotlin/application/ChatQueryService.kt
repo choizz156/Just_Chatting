@@ -7,10 +7,10 @@ import org.springframework.data.domain.Pageable
 
 interface ChatQueryService {
 
-    fun getChatRoom(roomId: Long): ChatRoomDto
-    fun getChatRooms(userId: Long, pageable: Pageable): Page<ChatRoomDto>
+    fun getChatRoom(roomId: String): ChatRoomDto
+    fun getChatRooms(userId: String, pageable: Pageable): Page<ChatRoomDto>
     fun searchChatRooms(query: String): List<ChatRoomDto>
-    fun getChatRoomMembers(roomId: Long): List<ChatRoomMemberDto>
-    fun getMessages(roomId: Long, userId: Long, pageable: Pageable): Page<MessageDto>
-    fun getMessagesByCursor(request: MessagePageRequest, userId: Long): MessagePageResponse
+    fun getChatRoomMembers(roomId: String): List<ChatRoomMemberDto>
+    fun getMessages(roomId: String, userId: String, pageable: Pageable): Page<ChatMessageDto>
+    fun getMessagesByCursor(request: MessagePageRequest, userId: String): MessagePageResponse
 }

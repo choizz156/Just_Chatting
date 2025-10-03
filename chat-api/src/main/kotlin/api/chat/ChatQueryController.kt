@@ -16,14 +16,14 @@ class ChatQueryController(
     private val chatQueryServiceV1: ChatQueryService
 ){
     @GetMapping("/{id}")
-    fun getChatRoom(@PathVariable id: Long): ApiResponseDto<ChatRoomDto> {
+    fun getChatRoom(@PathVariable id: String): ApiResponseDto<ChatRoomDto> {
         val chatRoom = chatQueryServiceV1.getChatRoom(id)
         return ApiResponseDto(chatRoom)
     }
 
     @GetMapping
     fun getChatRooms(
-        @RequestParam userId: Long,
+        @RequestParam userId: String,
         @PageableDefault(size = 20) pageable: Pageable
     ): ApiResponseDto<Page<ChatRoomDto>> {
         val chatRooms = chatQueryServiceV1.getChatRooms(userId, pageable)
@@ -31,7 +31,7 @@ class ChatQueryController(
     }
 
     @GetMapping("/{id}/members")
-    fun getChatRoomMembers(@PathVariable id: Long): ApiResponseDto<List<ChatRoomMemberDto>> {
+    fun getChatRoomMembers(@PathVariable id: String): ApiResponseDto<List<ChatRoomMemberDto>> {
         val members = chatQueryServiceV1.getChatRoomMembers(id)
         return ApiResponseDto(members)
     }
@@ -46,8 +46,8 @@ class ChatQueryController(
 
     @GetMapping("/{id}/messages")
     fun getMessages(
-        @PathVariable id: Long,
-        @RequestParam userId: Long,
+        @PathVariable id: String,
+        @RequestParam userId: String,
         @PageableDefault(size = 50) pageable: Pageable
     ): ApiResponseDto<Page<MessageDto>> {
         val messages = chatQueryServiceV1.getMessages(id, userId, pageable)
@@ -56,8 +56,8 @@ class ChatQueryController(
 
     @GetMapping("/{id}/messages/cursor")
     fun getMessagesByCursor(
-        @PathVariable id: Long,
-        @RequestParam userId: Long,
+        @PathVariable id: String,
+        @RequestParam userId: String,
         @RequestParam(required = false) cursor: Long?,
         @RequestParam(defaultValue = "50") limit: Int,
         @RequestParam(defaultValue = "BEFORE") direction: MessageDirection

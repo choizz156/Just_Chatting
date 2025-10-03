@@ -15,48 +15,50 @@ interface MessageRepository : JpaRepository<Message, Long> {
         """
         SELECT m FROM Message m 
         JOIN FETCH m.sender s
-        JOIN FETCH m.chatRoom cr
-        WHERE m.chatRoom.id = :chatRoomId AND m.isDeleted = false 
+        JOIN FETCH m.chatRoom1 cr
+        WHERE m.chatRoom1.id = :chatRoomId AND m.isDeleted = false 
         ORDER BY m.sequenceNumber DESC, m.createdAt DESC
     """
     )
-    fun findByChatRoomId(chatRoomId: Long, pageable: Pageable): Page<Message>
+    fun findByChatRoomId(chatRoomId: String, pageable: Pageable): Page<Message>
 
     @Query(
         """
         select m from Message m
         join fetch m.sender s
-        join fetch m.chatRoom cr
-        where m.chatRoom.id = :chatRoomId
+        join fetch m.chatRoom1 cr
+        where m.chatRoom1.id = :chatRoomId
         and m.isDeleted = false
         and m.id < :cursor
         order by m.sequenceNumber desc, m.createdAt desc 
     """
     )
-    fun findMessagesBefore(chatRoomId: Long, cursor: Long, pageable: Pageable): List<Message>
+    fun findMessagesBefore(chatRoomId: String, cursor: Long, pageable: Pageable): List<Message>
 
     @Query(
         """
         select m from Message m 
         join fetch m.sender s
-        join fetch m.chatRoom cr
-        where m.chatRoom.id = :chatRoomId 
+        join fetch m.chatRoom1 cr
+        where m.chatRoom1.id = :chatRoomId 
         and m.isDeleted = false 
         and m.id > :cursor
         order by m.sequenceNumber asc, m.createdAt asc   
     """
     )
-    fun findMessagesAfter(chatRoomId: Long, cursor: Long, pageable: Pageable): List<Message>
+    fun findMessagesAfter(chatRoomId: String, cursor: Long, pageable: Pageable): List<Message>
 
-    @Query("""
+    @Query(
+        """
         select m from Message m 
         join fetch m.sender s
-        join fetch m.chatRoom cr
-        where m.chatRoom.id = :chatRoomId 
+        join fetch m.chatRoom1 cr
+        where m.chatRoom1.id = :chatRoomId 
         and m.isDeleted = false 
         order by m.sequenceNumber desc, m.createdAt desc
-    """)
-    fun findLatestMessages(chatRoomId: Long, pageable: Pageable): List<Message>
+    """
+    )
+    fun findLatestMessages(chatRoomId: String, pageable: Pageable): List<Message>
 
     @Query(value = """
         select * from messages m 
@@ -65,5 +67,5 @@ interface MessageRepository : JpaRepository<Message, Long> {
         order by m.sequence_number desc, m.created_at desc 
         limit 1
     """, nativeQuery = true)
-    fun findLatestMessage(chatRoomId: Long): Message?
+    fun findLatestMessage(chatRoomId: String): Message?
 }

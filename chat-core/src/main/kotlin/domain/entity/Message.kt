@@ -22,7 +22,7 @@ data class Message(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id", nullable = false)
-    val chatRoom: ChatRoom,
+    val chatRoom1: ChatRoom1,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)

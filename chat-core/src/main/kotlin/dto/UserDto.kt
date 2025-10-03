@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank
 import java.time.LocalDateTime
 
 data class UserDto(
-    val id: Long,
+    val id: String,
     val email: String,
     val nickname: String,
     val profileImageUrl: String?,

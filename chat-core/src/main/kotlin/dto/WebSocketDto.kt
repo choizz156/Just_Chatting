@@ -16,7 +16,7 @@ import java.time.LocalDateTime
     JsonSubTypes.Type(value = ErrorMessage::class, name = "ERROR")
 )
 sealed class WebSocketMessage {
-    abstract val chatRoomId: Long?
+    abstract val chatRoomId: String?
     abstract val timestamp: LocalDateTime
 }
 
@@ -27,13 +27,13 @@ data class ChatMessageDTO(
     val senderId: Long,
     val senderName: String,
     val sequenceNumber: Long,
-    override val chatRoomId: Long,
+    override val chatRoomId: String,
     override val timestamp: LocalDateTime = LocalDateTime.now()
 ) : WebSocketMessage()
 
 data class ErrorMessage(
     val message: String,
     val code: String? = null,
-    override val chatRoomId: Long?,
+    override val chatRoomId: String?,
     override val timestamp: LocalDateTime = LocalDateTime.now()
 ) : WebSocketMessage()

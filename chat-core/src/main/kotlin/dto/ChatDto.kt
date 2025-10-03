@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 
 data class ChatRoomDto(
-    val id: Long,
+    val id: String,
     val name: String,
     val description: String?,
     val type: ChatRoomType,
@@ -18,7 +18,7 @@ data class ChatRoomDto(
     val memberCount: Int,
     val createdBy: UserDto,
     val createdAt: LocalDateTime,
-    val lastMessage: MessageDto?
+    val lastMessage: ChatMessageDto?
 )
 
 data class ChatRoomContext(
@@ -34,7 +34,7 @@ data class ChatRoomContext(
 )
 
 data class MessageDto(
-    val id: Long,
+    val id: String,
     val chatRoomId: Long,
     val sender: UserDto,
     val type: MessageType,
@@ -47,8 +47,8 @@ data class MessageDto(
 )
 
 data class ChatMessageDto(
-    val id: Long,
-    val chatRoomId: Long,
+    val id: String,
+    val chatRoomId: String,
     val sender: UserDto,
     val type: MessageType,
     val content: String?,
@@ -61,7 +61,7 @@ data class ChatMessageDto(
 
 data class SendMessageRequest(
     @field:NotNull(message = "채팅방 ID는 필수입니다")
-    val chatRoomId: Long,
+    val chatRoomId: String,
 
     @field:NotNull(message = "메시지 타입은 필수입니다")
     val type: MessageType,
@@ -70,7 +70,7 @@ data class SendMessageRequest(
 )
 
 data class MessagePageRequest(
-    val chatRoomId: Long,
+    val chatRoomId: String,
     val cursor: Long? = null,
     val limit: Int = 50,
     val direction: MessageDirection = MessageDirection.BEFORE
@@ -82,7 +82,7 @@ enum class MessageDirection {
 }
 
 data class MessagePageResponse(
-    val messages: List<MessageDto>,
+    val messages: List<ChatMessageDto>,
     val nextCursor: Long?,
     val prevCursor: Long?,
     val hasNext: Boolean,
@@ -90,7 +90,7 @@ data class MessagePageResponse(
 )
 
 data class ChatRoomMemberDto(
-    val id: Long,
+    val id: String,
     val user: UserDto,
     val role: MemberRole,
     val isActive: Boolean,

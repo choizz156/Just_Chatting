@@ -4,10 +4,9 @@ import com.chat.core.application.ChatService
 import com.chat.core.application.Validator
 import com.chat.core.domain.entity.*
 import com.chat.core.dto.*
-import com.chat.core.dto.ChatMessageDTO
 import com.chat.persistence.redis.RedisMessageBroker
-import com.chat.persistence.repository.ChatRoomMemberRepository
-import com.chat.persistence.repository.ChatRoomRepository
+import com.chat.persistence.repository.ChatRoomMemberRepository1
+import com.chat.persistence.repository.ChatRoomRepository1
 import com.chat.persistence.repository.UserRepository
 import com.chat.persistence.repository.findByIdOrThrow
 import org.slf4j.LoggerFactory
@@ -19,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class ChatServiceV1(
-    private val chatRoomRepository: ChatRoomRepository,
-    private val chatRoomMemberRepository: ChatRoomMemberRepository,
+    private val chatRoomRepository1: ChatRoomRepository1,
+    private val chatRoomMemberRepository1: ChatRoomMemberRepository1,
     private val userRepository: UserRepository,
     private val redisMessageBroker: RedisMessageBroker,
     private val messageService: MessageService,
@@ -56,17 +55,17 @@ class ChatServiceV1(
     )
     override fun joinChatRoom(roomId: Long, userId: Long) {
 
-        val chatRoom = chatRoomRepository.findByIdOrThrow(roomId)
+        val chatRoom = chatRoomRepository1.findByIdOrThrow(roomId)
         val user = userRepository.findByIdOrThrow(userId)
 
         validator.isChatRoomMemberAlready(roomId, userId)
 
-        val member = ChatRoomMember(
-            chatRoom = chatRoom,
+        val member = ChatRoomMember1(
+            chatRoom1 = chatRoom,
             user = user,
             role = MemberRole.MEMBER
         )
-        chatRoomMemberRepository.save(member)
+        chatRoomMemberRepository1.save(member)
 
         if (webSocketSessionManager.isUserOnlineLocally(userId)) {
             webSocketSessionManager.joinRoom(userId, roomId)
@@ -80,7 +79,7 @@ class ChatServiceV1(
         ]
     )
     override fun leaveChatRoom(roomId: Long, userId: Long) {
-        chatRoomMemberRepository.leaveChatRoom(roomId, userId)
+        chatRoomMemberRepository1.leaveChatRoom(roomId, userId)
         if (webSocketSessionManager.isUserOnlineLocally(userId)) {
             webSocketSessionManager.leaveRoom(userId, roomId)
         }
@@ -106,7 +105,7 @@ class ChatServiceV1(
         request: SendMessageRequest,
         senderId: Long
     ): Message {
-        val chatRoom = chatRoomRepository.findByIdOrThrow(request.chatRoomId)
+        val chatRoom = chatRoomRepository1.findByIdOrThrow(request.chatRoomId)
         val sender = userRepository.findByIdOrThrow(senderId)
         val sequenceNumber = messageService.getNextSequence(request.chatRoomId)
 
@@ -114,7 +113,7 @@ class ChatServiceV1(
             content = request.content,
             sequenceNumber = sequenceNumber,
             sender = sender,
-            chatRoom = chatRoom,
+            chatRoom1 = chatRoom,
             type = request.type
         )
 
@@ -124,7 +123,7 @@ class ChatServiceV1(
 
     private fun publishMessage(
         request: SendMessageRequest,
-        chatMessageDTO: com.chat.core.dto.ChatMessageDTO
+        chatMessageDTO: ChatMessageDTO
     ) {
         webSocketSessionManager.sendMessageToLocalRoom(request.chatRoomId, chatMessageDTO)
         broadcastMessage(request, chatMessageDTO)
@@ -149,13 +148,13 @@ class ChatServiceV1(
         savedRoom: ChatRoom,
         creator: User
     ) {
-        val ownerMember = ChatRoomMember(
-            chatRoom = savedRoom,
+        val ownerMember = ChatRoomMember1(
+            chatRoom1 = savedRoom,
             user = creator,
             role = MemberRole.OWNER,
         )
 
-        chatRoomMemberRepository.save(ownerMember)
+        chatRoomMemberRepository1.save(ownerMember)
     }
 
     private fun saveChatRoom(
@@ -171,7 +170,7 @@ class ChatServiceV1(
             createdBy = creator
         )
 
-        val savedRoom = chatRoomRepository.save(chatRoom)
+        val savedRoom = chatRoomRepository1.save(chatRoom)
         return savedRoom
     }
 }

@@ -4,8 +4,8 @@ import com.chat.core.application.UserService
 import com.chat.core.application.Validator
 import com.chat.core.application.dto.CreateUserContext
 import com.chat.core.application.dto.UserDto
-import com.chat.core.domain.entity.User
-import com.chat.persistence.repository.UserRepository
+import com.chat.core.domain.entity.User1
+import com.chat.persistence.repository.UserRepository1
 import jakarta.transaction.Transactional
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 @Service
 @Transactional
 class UserServiceV1(
-    private val userRepository: UserRepository,
+    private val userRepository: UserRepository1,
     private val dtoConverter: DtoConverter,
     private val passwordEncoder: PasswordEncoder,
     private val validator: Validator
@@ -24,7 +24,7 @@ class UserServiceV1(
         validator.checkEmail(request.email)
         validator.checkNickname(request.nickname)
 
-        val user = User(
+        val user = User1(
             email = request.email,
             password = passwordEncoder.encode(request.password),
             nickname = request.nickname

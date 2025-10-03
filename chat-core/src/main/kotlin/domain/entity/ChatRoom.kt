@@ -1,48 +1,42 @@
 package com.chat.core.domain.entity
 
-import domain.entity.BaseEntity
-import jakarta.persistence.*
-import jakarta.validation.constraints.NotBlank
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import org.bson.types.ObjectId
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.mongodb.core.mapping.Document
+import java.time.LocalDateTime
 
-@Entity
-@Table(
-    name = "chat_rooms",
-    indexes = [
-        Index(name = "idx_chat_room_created_by", columnList = "created_by"),
-        Index(name = "idx_chat_room_type", columnList = "type"),
-        Index(name = "idx_chat_room_active", columnList = "is_active")
-    ]
-)
+
+@Document("chat_rooms")
 data class ChatRoom(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0L,
 
-    @Column(nullable = false, length = 100)
-    @NotBlank
+    @Id
+    val id: ObjectId? = null,
+
     val name: String,
 
-    @Column(columnDefinition = "TEXT")
     val description: String? = null,
 
-    @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     val type: ChatRoomType = ChatRoomType.GROUP,
 
-    @Column(length = 500)
     val imageUrl: String? = null,
 
-    @Column(nullable = false)
     val isActive: Boolean = true,
 
-    @Column(nullable = false)
     val maxMembers: Int = 100,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
-    val createdBy: User,
+    val createdBy: String? = null,
 
-): BaseEntity()
+    @CreatedDate
+    var createdAt: LocalDateTime = LocalDateTime.now(),
+
+    @LastModifiedDate
+    var updatedAt: LocalDateTime = LocalDateTime.now()
+)
 
 enum class ChatRoomType {
     DIRECT,

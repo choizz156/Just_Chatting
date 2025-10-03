@@ -1,5 +1,6 @@
 package com.chat.core.domain.entity
 
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
@@ -10,11 +11,11 @@ import java.time.LocalDateTime
 data class ChatMessage(
 
     @Id
-    val id: String? = null,
+    val id: ObjectId? = null,
 
-    val chatRoomId: Long,
+    val chatRoomId: String,
 
-    val senderId: Long,
+    val senderId: String,
 
     val type: MessageType = MessageType.TEXT,
 

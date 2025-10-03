@@ -2,12 +2,12 @@ package com.chat.persistence.application
 
 import com.chat.core.application.ChatQueryService
 import com.chat.core.application.Validator
+import com.chat.core.domain.entity.ChatMessage
 import com.chat.core.domain.entity.ChatRoomMember
-import com.chat.core.domain.entity.Message
 import com.chat.core.dto.*
+import com.chat.persistence.repository.ChatMessageRepository
 import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.chat.persistence.repository.ChatRoomRepository
-import com.chat.persistence.repository.MessageRepository
 import com.chat.persistence.repository.findByIdOrThrow
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
@@ -21,27 +21,28 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class ChatQueryServiceV1(
     private val chatRoomRepository: ChatRoomRepository,
-    private val messageRepository: MessageRepository,
+    private val chatMessageRepository: ChatMessageRepository,
     private val chatRoomMemberRepository: ChatRoomMemberRepository,
     private val dtoConverter: DtoConverter,
     private val validator: Validator
 ) : ChatQueryService {
 
     @Cacheable(value = ["chatRooms"], key = "#roomId")
-    override fun getChatRoom(roomId: Long): ChatRoomDto {
+    override fun getChatRoom(roomId: String): ChatRoomDto {
         val chatRoom = chatRoomRepository.findByIdOrThrow(roomId)
         return dtoConverter.chatRoomToDto(chatRoom)
     }
 
     override fun getChatRooms(
-        userId: Long,
+        userId: String,
         pageable: Pageable
     ): Page<ChatRoomDto> {
-        val chatRoomPage = chatRoomRepository.findUserChatRoom(userId, pageable)
-        val chatRoomList = chatRoomPage.content.map { it ->
+
+        val chatRoomList = chatRoomRepository.findChatRoomsByUserId(userId, pageable)
+        val chatRoomDtoList = chatRoomList.map{ it ->
             dtoConverter.chatRoomToDto(it)
         }
-        return PageImpl(chatRoomList, pageable, chatRoomPage.totalElements)
+        return PageImpl(chatRoomDtoList, pageable, chatRoomList.size.toLong())
     }
 
     override fun searchChatRooms(
@@ -58,25 +59,26 @@ class ChatQueryServiceV1(
     }
 
     @Cacheable(value = ["chatRoomMembers"], key = "#roomId")
-    override fun getChatRoomMembers(roomId: Long): List<ChatRoomMemberDto> {
+    override fun getChatRoomMembers(roomId: String): List<ChatRoomMemberDto> {
         return chatRoomMemberRepository.findByChatRoomIdAndIsActiveTrue(roomId)
             .map(this::memberToDto)
     }
 
     override fun getMessages(
-        roomId: Long,
-        userId: Long,
+        roomId: String,
+        userId: String,
         pageable: Pageable
-    ): Page<MessageDto> {
+    ): Page<ChatMessageDto> {
+
         validator.isNotChatRoomMember(roomId, userId)
 
-        return messageRepository.findByChatRoomId(roomId, pageable)
+        return chatMessageRepository.findByChatRoomId(roomId, pageable)
             .map(dtoConverter::messageToDto)
     }
 
     override fun getMessagesByCursor(
         request: MessagePageRequest,
-        userId: Long
+        userId: String
     ): MessagePageResponse {
 
         validator.isNotChatRoomMember(request.chatRoomId, userId)
@@ -90,21 +92,21 @@ class ChatQueryServiceV1(
     private fun findMessagesWithCursor(
         request: MessagePageRequest,
         pageable: Pageable
-    ): List<Message> {
+    ): List<ChatMessage> {
         return when {
             request.cursor == null ->
-                messageRepository.findLatestMessages(request.chatRoomId, pageable)
+                chatMessageRepository.findLatestMessagesByChatRoomId(request.chatRoomId, pageable)
 
             request.direction == MessageDirection.BEFORE ->
-                messageRepository.findMessagesBefore(request.chatRoomId, request.cursor!!, pageable)
+                chatMessageRepository.findChatMessagesBefore(request.chatRoomId, request.cursor!!, pageable)
 
             else ->
-                messageRepository.findMessagesAfter(request.chatRoomId, request.cursor!!, pageable)
+                chatMessageRepository.findChatMessagesAfter(request.chatRoomId, request.cursor!!, pageable)
         }
     }
 
     private fun buildCursorResponse(
-        messages: List<Message>,
+        messages: List<ChatMessage>,
         cursor: Long?,
         limit: Int
     ): MessagePageResponse {
@@ -113,8 +115,8 @@ class ChatQueryServiceV1(
 
         return MessagePageResponse(
             messages = messagesDtos,
-            nextCursor = messagesDtos.lastOrNull()?.id,
-            prevCursor = messagesDtos.firstOrNull()?.id,
+            nextCursor = messagesDtos.lastOrNull()?.id?.toLong(),
+            prevCursor = messagesDtos.firstOrNull()?.id?.toLong(),
             hasNext = messages.size == limit,
             hasPrev = cursor != null
         )
@@ -122,8 +124,8 @@ class ChatQueryServiceV1(
 
     private fun memberToDto(member: ChatRoomMember): ChatRoomMemberDto {
         return ChatRoomMemberDto(
-            id = member.id,
-            user = dtoConverter.userToDto(member.user),
+            id = member.id.toString(),
+            user = dtoConverter.userToDto(member.userId),
             role = member.role,
             isActive = member.isActive,
             lastReadMessageId = member.lastReadMessageId,

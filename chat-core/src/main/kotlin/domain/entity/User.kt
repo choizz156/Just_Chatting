@@ -42,11 +42,5 @@ data class User(
 
     ) : BaseEntity()
 
-enum class UserStatus {
-    ACTIVE, WITH_DRAW;
-}
 
-enum class UserRole {
-    USER, ADMIN, HOST, GUEST;
-}
 

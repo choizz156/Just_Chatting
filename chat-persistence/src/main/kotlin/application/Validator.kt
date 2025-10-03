@@ -1,21 +1,21 @@
 package com.chat.core.application
 
 import com.chat.persistence.application.WebSocketSessionManager
-import com.chat.persistence.repository.UserRepository
+import com.chat.persistence.repository.UserRepository1
 import org.springframework.stereotype.Component
 
 @Component
 class Validator(
     private val webSocketSessionManager: WebSocketSessionManager,
-    private val userRepository: UserRepository,
+    private val userRepository: UserRepository1,
 ) {
-    fun isNotChatRoomMember(roomId: Long, userId: Long) {
+    fun isNotChatRoomMember(roomId: String, userId: String) {
         if (!webSocketSessionManager.existJoiningRoomAlready(roomId, userId)) {
             throw IllegalArgumentException("채팅방 멤버가 아닙니다")
         }
     }
 
-    fun isChatRoomMemberAlready(roomId: Long, userId: Long) {
+    fun isChatRoomMemberAlready(roomId: String, userId: String) {
         if (webSocketSessionManager.existJoiningRoomAlready(roomId, userId)) {
             throw IllegalArgumentException("이미 참여한 채팅방입니다")
         }

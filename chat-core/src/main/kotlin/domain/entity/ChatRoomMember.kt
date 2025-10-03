@@ -1,55 +1,43 @@
 package com.chat.core.domain.entity
 
-import domain.entity.BaseEntity
-import jakarta.persistence.*
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
-@Entity
-@Table(
-    name = "chat_room_members",
-    uniqueConstraints = [
-        UniqueConstraint(columnNames = ["chat_room_id", "user_id"])
-    ],
-    indexes = [
-        Index(name = "idx_chat_room_member_user_id", columnList = "user_id"),
-        Index(name = "idx_chat_room_member_chat_room_id", columnList = "chat_room_id"),
-        Index(name = "idx_chat_room_member_active", columnList = "is_active"),
-        Index(name = "idx_chat_room_member_role", columnList = "role")
-    ]
-)
+
+@Document(collection = "chat_room_members")
 data class ChatRoomMember(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    val id: ObjectId? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chat_room_id", nullable = false)
-    val chatRoom: ChatRoom,
+    val chatRoomId: String,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    val user: User,
+    val userId: String,
 
-    @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     val role: MemberRole = MemberRole.MEMBER,
 
-    @Column(nullable = false)
     val isActive: Boolean = true,
 
-    @Column
     val lastReadMessageId: Long? = null,
 
-    @Column(nullable = false)
     val joinedAt: LocalDateTime = LocalDateTime.now(),
 
-    @Column
     val leftAt: LocalDateTime? = null,
-): BaseEntity()
+
+    @CreatedDate
+    var createdAt: LocalDateTime = LocalDateTime.now(),
+
+    @LastModifiedDate
+    var updatedAt: LocalDateTime = LocalDateTime.now()
+)
 
 enum class MemberRole {
     OWNER,
-    ADMIN,
     MEMBER
 }

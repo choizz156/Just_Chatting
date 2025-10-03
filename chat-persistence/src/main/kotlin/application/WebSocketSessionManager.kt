@@ -170,8 +170,8 @@ class WebSocketSessionManager(
         logger.info("Removed $subscribedRooms")
     }
 
-    fun existJoiningRoomAlready(roomId: Long, userId: Long): Boolean {
-        val sessions = roomSessions[roomId] ?: return false
+    fun existJoiningRoomAlready(roomId: String, userId: String): Boolean {
+        val sessions = roomSessions[roomId.toLong()] ?: return false
 
         sessions.forEach { session ->
             if(session.attributes["userId"] == userId)
