@@ -1,104 +1,100 @@
-package com.chat.api.user
+package api.user
 
 import api.TestApplication
 import com.chat.core.application.UserService
 import com.chat.core.application.dto.UserDto
 import com.chat.core.domain.entity.UserRole
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.hamcrest.Matchers.notNullValue
-import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.given
 import org.mockito.kotlin.any
+import org.mockito.kotlin.given
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import java.time.LocalDateTime
+import kotlin.test.Test
 
-@ActiveProfiles("test")
-@SpringBootTest(
-    classes = [TestApplication::class],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+
+@WebMvcTest(UserController::class)
+@Import(
+    TestApplication::class
 )
-@AutoConfigureMockMvc
 class UserControllerTest(
-    @Autowired
-    private val mockMvc: MockMvc,
-    @Autowired
-    private val objectMapper: ObjectMapper
+    @Autowired private val mockMvc: MockMvc,
+    @Autowired private val objectMapper: ObjectMapper,
 ) {
 
     @MockBean
-    private lateinit var userServiceV1: UserService
+    private lateinit var userService: UserService
 
     @Test
-    fun `join success`() {
+    fun `회원가입 성공`() {
         // given
         val request = CreateUserRequest(
             email = "test@test.com",
-            password = "password",
+            password = "password123",
             displayName = "testUser"
         )
+
         val createdUser = UserDto(
-            id = 1L,
+            id = "1",
             email = request.email,
             nickname = request.displayName,
             profileImageUrl = null,
             status = null,
             isActive = true,
             roles = UserRole.USER,
-            lastSeenAt = null,
+            lastSeenAt = LocalDateTime.now(),
             createdAt = LocalDateTime.now()
         )
 
-        given(userServiceV1.createUser(any())).willReturn(createdUser)
+        given(userService.createUser(any())).willReturn(createdUser)
 
-        // when then
+        // when & then
         mockMvc.post("/users") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
         }.andExpect {
             status { isCreated() }
-            jsonPath("$.data") { value(1L) }
-            jsonPath("$.time") { value(notNullValue()) }
+            jsonPath("$.data") { value("1") }
+            jsonPath("$.time") { exists() }
         }.andDo { print() }
     }
 
     @Test
-    fun ` blank email`() {
+    fun `이메일 형식이 잘못된 경우 BadRequest`() {
         // given
-        val request = CreateUserRequest(
-            email = "3423mek",
-            password = "password",
+        val invalidRequest = CreateUserRequest(
+            email = "invalidEmail",
+            password = "password123",
             displayName = "testUser"
         )
 
         // when & then
         mockMvc.post("/users") {
             contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(request)
+            content = objectMapper.writeValueAsString(invalidRequest)
         }.andExpect {
             status { isBadRequest() }
         }.andDo { print() }
     }
 
     @Test
-    fun `Space email`() {
+    fun `이메일에 공백이 포함된 경우 BadRequest`() {
         // given
-        val request = CreateUserRequest(
-            email = "test11@ test.com",
-            password = "password",
+        val invalidRequest = CreateUserRequest(
+            email = "test @test.com",
+            password = "password123",
             displayName = "testUser"
         )
 
         // when & then
         mockMvc.post("/users") {
             contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(request)
+            content = objectMapper.writeValueAsString(invalidRequest)
         }.andExpect {
             status { isBadRequest() }
         }.andDo { print() }

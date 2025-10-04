@@ -1,7 +1,9 @@
 package api
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.test.context.ActiveProfiles
 
-@SpringBootApplication(scanBasePackages = ["com.chat"])
+@ActiveProfiles("test")
+@SpringBootApplication
 class TestApplication {
 }

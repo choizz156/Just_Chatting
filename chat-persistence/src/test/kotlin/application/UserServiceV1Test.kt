@@ -21,7 +21,7 @@ class UserServiceV1Test(
 
     @BeforeEach
     fun setUp() {
-        userRepository.deleteAllInBatch()
+        userRepository.deleteAll()
     }
 
     @Test

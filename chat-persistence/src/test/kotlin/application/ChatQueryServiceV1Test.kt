@@ -33,9 +33,9 @@ class ChatQueryServiceV1Test(
 
     @BeforeEach
     fun setUp() {
-        chatRoomMemberRepository.deleteAll();
-        chatRoomRepository.deleteAllInBatch()
-        userRepository.deleteAllInBatch()
+        chatRoomMemberRepository.deleteAll()
+        chatRoomRepository.deleteAll()
+        userRepository.deleteAll()
     }
 
     @Test
@@ -57,10 +57,10 @@ class ChatQueryServiceV1Test(
         val chatRoom = chatRoomRepository.save(entity)
 
         //when
-        val result = chatQueryService.getChatRoom(chatRoom.id)
+        val result = chatQueryService.getChatRoom(chatRoom.id.toString())
 
         //then
-        assertThat(result.id).isEqualTo(chatRoom.id)
+        assertThat(result.id.toString()).isEqualTo(chatRoom.id.toString())
         assertThat(result.name).isEqualTo(chatRoom.name)
     }
 
@@ -81,30 +81,30 @@ class ChatQueryServiceV1Test(
 
         chatRoomMemberRepository.saveAll(
             listOf(
-                ChatRoomMember(chatRoom = room1, user = user1),
-                ChatRoomMember(chatRoom = room2, user = user1),
+                ChatRoomMember(chatRoomId = room1.id, userId = user1.id),
+                ChatRoomMember(chatRoomId = room2.id, userId = user1.id),
             )
         )
 
         chatRoomMemberRepository.saveAll(
             listOf(
-                ChatRoomMember(chatRoom = room3, user = user2),
-                ChatRoomMember(chatRoom = room4, user = user2)
+                ChatRoomMember(chatRoomId = room3.id, userId = user2.id),
+                ChatRoomMember(chatRoomId = room4.id, userId = user2.id)
             )
         )
 
         //when
         val result1: Page<ChatRoomDto> =
-            chatQueryService.getChatRooms(user1.id, PageRequest.of(0, 10))
+            chatQueryService.getChatRooms(user1.id.toString(), PageRequest.of(0, 10))
         val result2: Page<ChatRoomDto> =
-            chatQueryService.getChatRooms(user2.id, PageRequest.of(0, 10))
+            chatQueryService.getChatRooms(user2.id.toString(), PageRequest.of(0, 10))
 
         //then
         assertThat(result1.content).hasSize(2)
             .extracting("name")
             .containsAnyOf("room2", "room1")
         assertThat(result2.content).hasSize(2)
-        .extracting("name")
+            .extracting("name")
             .containsAnyOf("room4", "room3")
     }
 
@@ -120,13 +120,12 @@ class ChatQueryServiceV1Test(
 
         chatRoomMemberRepository.saveAll(
             listOf(
-                ChatRoomMember(chatRoom = room1, user = user1),
-                ChatRoomMember(chatRoom = room2, user = user1)
+                ChatRoomMember(chatRoomId = room1.id, userId = user1.id),
+                ChatRoomMember(chatRoomId = room2.id, userId = user1.id)
             )
         )
 
         val searchChatRooms = chatQueryService.searchChatRooms("ro")
-
         assertThat(searchChatRooms).hasSize(2)
             .extracting("name")
             .containsExactly(room2.name, room1.name)
@@ -145,8 +144,8 @@ class ChatQueryServiceV1Test(
 
         chatRoomMemberRepository.saveAll(
             listOf(
-                ChatRoomMember(chatRoom = room1, user = user1),
-                ChatRoomMember(chatRoom = room2, user = user1)
+                ChatRoomMember(chatRoomId = room1.id, userId = user1.id),
+                ChatRoomMember(chatRoomId = room2.id, userId = user1.id)
             )
         )
 
@@ -172,15 +171,15 @@ class ChatQueryServiceV1Test(
 
         chatRoomMemberRepository.saveAll(
             listOf(
-                ChatRoomMember(chatRoom = room1, user = user1),
-                ChatRoomMember(chatRoom = room1, user = user2)
+                ChatRoomMember(chatRoomId = room1.id, userId = user1.id),
+                ChatRoomMember(chatRoomId = room1.id, userId = user2.id)
             )
         )
 
-        val members = chatQueryService.getChatRoomMembers(room1.id)
+        val members = chatQueryService.getChatRoomMembers(room1.id.toString())
 
         assertThat(members).hasSize(2)
-            .extracting("user.nickname")
-            .containsAnyOf(user1.nickname, user2.nickname)
+            .extracting("userId")
+            .containsAnyOf(user1.id.toString(), user2.id.toString())
     }
 }

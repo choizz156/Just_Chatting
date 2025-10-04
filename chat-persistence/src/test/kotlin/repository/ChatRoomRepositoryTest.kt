@@ -9,6 +9,7 @@ import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.chat.persistence.repository.ChatRoomRepository
 import com.chat.persistence.repository.UserRepository
 import com.chat.persistence.repository.findByIdOrThrow
+import de.flapdoodle.embed.mongo.client.AuthenticationSetup.role
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -29,7 +30,7 @@ import org.springframework.test.context.ContextConfiguration
     classes = [ChatRoomRepository::class, ChatRoomMemberRepository::class]
 )
 @DataMongoTest
-class ChatMessageRepositoryTest {
+class ChatRoomRepositoryTest {
     @Autowired
     private lateinit var chatRoomRepository: ChatRoomRepository
 
@@ -69,7 +70,7 @@ class ChatMessageRepositoryTest {
 
         val chatRoomMember1 = ChatRoomMember(
             userId = testUser.id,
-            chatRoomId = chatRoom1.id,
+            chatRoomId= chatRoom1.id,
             role = MemberRole.MEMBER
         )
         val chatRoomMember2 = ChatRoomMember(
