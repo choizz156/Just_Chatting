@@ -132,8 +132,7 @@ class ChatServiceV1(
         request: SendMessageRequest,
         chatMessageDto: ChatMessageDto
     ) {
-        // WebSocketSessionManager와 RedisMessageBroker의 DTO 타입 통일 필요
-        // 우선 임시로 ChatMessageDto를 생성하여 전달
+
         val tempDto = ChatMessageDto(
             id = chatMessageDto.id,
             content = chatMessageDto.content,
