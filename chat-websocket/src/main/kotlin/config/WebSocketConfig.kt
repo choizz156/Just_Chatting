@@ -14,11 +14,11 @@ class WebSocketConfig(
     private val chatWebSocketHandler: ChatWebSocketHandler,
     private val webSocketHandshakeInterceptor: WebSocketHandshakeInterceptor
 ) : WebSocketConfigurer {
+
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry.addHandler(chatWebSocketHandler, "/ws/chat")
             .addInterceptors(webSocketHandshakeInterceptor)
             .setAllowedOrigins("*")
     }
-
 }
 

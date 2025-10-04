@@ -20,6 +20,7 @@ class RedisMessageBroker(
     private val messageListenerContainer: RedisMessageListenerContainer,
     private val objectMapper: ObjectMapper
 ) : MessageListener {
+
     private val logger = LoggerFactory.getLogger(RedisMessageBroker::class.java)
     private val serverId = System.getenv("HOSTNAME") ?: "server-${System.currentTimeMillis()}"
     private val processedMessages = ConcurrentHashMap<String, Long>()
@@ -34,7 +35,7 @@ class RedisMessageBroker(
 
         Thread {
             try {
-                Thread.sleep(300000)
+                Thread.sleep(30000)
                 cleanUpProcessedMessages()
             } catch (e: Exception) {
                 logger.error("Error in initializing RedisMessageListenerContainer", e)

@@ -42,7 +42,7 @@ class WebSocketSessionManager(
         userSession[userId]?.remove(session)
 
         if (userSession[userId].isNullOrEmpty()) {
-            removeUserSession(userId)
+            userSession.remove(userId)
         }
 
         roomSessions.values.forEach { sessionsInRoom ->
@@ -68,8 +68,7 @@ class WebSocketSessionManager(
         if (sessionsInRoom.isEmpty()) {
             roomSessions.remove(roomId)
 
-            val serverId = redisMessageBroker.getServerId()
-            val serverRoomKey = "$SERVER_ROOMS_KEY_PREFIX$serverId"
+            val (serverId, serverRoomKey) = pair()
 
             redisMessageBroker.unsubscribeFromRoom(roomId)
             redisTemplate.opsForSet().remove(serverRoomKey, roomId)
@@ -85,8 +84,7 @@ class WebSocketSessionManager(
             roomSessions.computeIfAbsent(roomId) { mutableSetOf() }.add(userSession)
         }
 
-        val serverId = redisMessageBroker.getServerId()
-        val serverRoomKey = "${SERVER_ROOMS_KEY_PREFIX}$serverId"
+        val (serverId, serverRoomKey) = pair()
 
         val wasAlreadySubscribed =
             redisTemplate.opsForSet().isMember(serverRoomKey, roomId) == true
@@ -100,14 +98,19 @@ class WebSocketSessionManager(
         logger.info("Joined $roomId for $userId $serverId to server $serverRoomKey")
     }
 
-    fun sendMessageToLocalRoom(roomId: String, message: ChatMessageDto?, excludeUserId: String? = null) {
+    fun sendMessageToLocalRoom(
+        roomId: String,
+        message: ChatMessageDto?,
+        excludeUserId: String? = null
+    ) {
 
-        val sessionsInRoom = if(roomSessions[roomId].isNullOrEmpty()) return else roomSessions[roomId]!!
+        val sessionsInRoom =
+            if (roomSessions[roomId].isNullOrEmpty()) return else roomSessions[roomId]
 
         val json = objectMapper.writeValueAsString(message)
         val closedSessions = mutableSetOf<WebSocketSession>()
 
-        sessionsInRoom.forEach { session ->
+        sessionsInRoom!!.forEach { session ->
             if (excludeUserId != null && session.attributes["userId"] == excludeUserId) {
                 return@forEach
             }
@@ -119,10 +122,8 @@ class WebSocketSessionManager(
 
         if (closedSessions.isNotEmpty()) {
             closedSessions.forEach { session ->
-                val userId = session.attributes["userId"] as? String
-                if (userId != null) {
-                    removeSession(userId, session)
-                }
+                val userId = session.attributes["userId"] as? String ?: return@forEach
+                removeSession(userId, session)
             }
             logger.info("closed session :: count = ${closedSessions.size}")
         }
@@ -136,10 +137,8 @@ class WebSocketSessionManager(
 
         if (closedSessions.isNotEmpty()) {
             closedSessions.forEach { session ->
-                val userId = session.attributes["userId"] as? String
-                if (userId != null) {
+                val userId = session.attributes["userId"]  as? String ?: return@forEach
                     removeSession(userId, session)
-                }
             }
         }
 
@@ -160,19 +159,14 @@ class WebSocketSessionManager(
         }
     }
 
-    private fun removeUserSession(userId: String) {
-        userSession.remove(userId)
-    }
-
     private fun deleteRoomIfNoConnectedUsers() {
 
-        val serverId = redisMessageBroker.getServerId()
-        val serverRoomKey = "${SERVER_ROOMS_KEY_PREFIX}$serverId"
+        val (serverId, serverRoomKey) = pair()
 
         val subscribedRooms = redisTemplate.opsForSet().members(serverRoomKey) ?: emptySet()
 
-        subscribedRooms.forEach { roomIdStr ->
-            redisMessageBroker.unsubscribeFromRoom(roomIdStr)
+        subscribedRooms.forEach { roomId ->
+            redisMessageBroker.unsubscribeFromRoom(roomId)
         }
 
         redisTemplate.delete(serverRoomKey)
@@ -183,10 +177,16 @@ class WebSocketSessionManager(
         val sessions = roomSessions[roomId] ?: return false
 
         sessions.forEach { session ->
-            if(session.attributes["userId"] == userId)
+            if (session.attributes["userId"] == userId)
                 return true
         }
 
         return false
+    }
+
+    private fun pair(): Pair<String, String> {
+        val serverId = redisMessageBroker.getServerId()
+        val serverRoomKey = "${SERVER_ROOMS_KEY_PREFIX}$serverId"
+        return Pair(serverId, serverRoomKey)
     }
 }
