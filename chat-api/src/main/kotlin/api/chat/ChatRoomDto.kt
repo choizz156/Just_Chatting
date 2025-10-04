@@ -2,7 +2,7 @@ package com.chat.api.chat
 
 import com.chat.core.application.dto.UserDto
 import com.chat.core.domain.entity.ChatRoomType
-import com.chat.core.dto.MessageDto
+import com.chat.core.dto.ChatMessageDto
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
@@ -24,7 +24,7 @@ data class CreateChatRoomRequest(
 )
 
 data class ChatRoomResponseDto(
-    val id: Long,
+    val id: String,
     val name: String,
     val description: String?,
     val type: ChatRoomType,
@@ -34,5 +34,5 @@ data class ChatRoomResponseDto(
     val memberCount: Int,
     val createdBy: UserDto,
     val createdAt: LocalDateTime,
-    val lastMessage: MessageDto?
+    val lastMessage: ChatMessageDto?
 )

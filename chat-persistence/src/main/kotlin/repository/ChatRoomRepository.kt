@@ -1,6 +1,7 @@
 package com.chat.persistence.repository
 
 import com.chat.core.domain.entity.ChatRoom
+import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.repository.Aggregation
 import org.springframework.data.mongodb.repository.MongoRepository
@@ -21,7 +22,7 @@ interface ChatRoomRepository : MongoRepository<ChatRoom, String> {
             "{ \$replaceRoot: { newRoot: '\$doc' } }"
         ]
     )
-    fun findChatRoomsByUserId(userId: String, pageable: Pageable): List<ChatRoom>
+    fun findChatRoomsByUserId(userId: ObjectId?, pageable: Pageable): List<ChatRoom>
     fun findByIsActiveTrueOrderByCreatedAtDesc(): List<ChatRoom>
     fun findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc(name: String): List<ChatRoom>
 }

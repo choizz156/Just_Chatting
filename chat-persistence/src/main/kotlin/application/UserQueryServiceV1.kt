@@ -4,6 +4,7 @@ import com.chat.core.application.UserQueryService
 import com.chat.core.application.dto.UserDto
 import com.chat.persistence.repository.UserRepository
 import com.chat.persistence.repository.findByIdOrThrow
+import org.bson.types.ObjectId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -17,8 +18,8 @@ class UserQueryServiceV1(
     private val dtoConverter: DtoConverter
 ) : UserQueryService {
 
-    override fun getUserById(userId: Long): UserDto {
-        val user = userRepository.findByIdOrThrow(userId)
+    override fun getUserById(userId: String): UserDto {
+        val user = userRepository.findByIdOrThrow(ObjectId(userId))
 
         return dtoConverter.userToDto(user)
     }
@@ -27,15 +28,16 @@ class UserQueryServiceV1(
         query: String,
         pageable: Pageable
     ): Page<UserDto> {
-        return userRepository.searchUsers(query, pageable).map { dtoConverter.userToDto(it) }
+        // TODO: MongoDB에 맞게 검색 기능 구현
+        return Page.empty()
     }
 
-    override fun updateLastSeen(userId: Long): UserDto {
-
-        val user = userRepository.findByIdOrThrow(userId)
+    override fun updateLastSeen(userId: String): UserDto {
+        val user = userRepository.findByIdOrThrow(ObjectId(userId))
 
         val now = LocalDateTime.now()
-        userRepository.updateLastSeenAt(userId, now)
+        // TODO: MongoDB에 맞게 마지막 접속 시간 업데이트 기능 구현
+        // userRepository.updateLastSeenAt(userId, now)
 
         return dtoConverter.userToDto(user.copy(lastSeenAt = now))
     }

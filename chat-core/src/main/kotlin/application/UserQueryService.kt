@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable
 
 interface UserQueryService {
 
-    fun getUserById(userId: Long): UserDto
+    fun getUserById(userId: String): UserDto
     fun searchUsers(query: String, pageable: Pageable): Page<UserDto>
-    fun updateLastSeen(userId: Long): UserDto
+    fun updateLastSeen(userId: String): UserDto
 }

@@ -1,27 +1,19 @@
 package com.chat.persistence.application
 
-import com.chat.core.domain.entity.Message
-import com.chat.persistence.repository.MessageRepository
-import org.springframework.data.redis.core.RedisTemplate
+import com.chat.core.domain.entity.ChatMessage
+import com.chat.persistence.repository.ChatMessageRepository
 import org.springframework.stereotype.Service
 
 @Service
 class MessageService(
-    private val redisTemplate: RedisTemplate<String, String>,
-    private val messageRepository: MessageRepository,
+    private val chatMessageRepository: ChatMessageRepository
 ) {
-    private val prefix = "chat:sequence"
-
-    fun getNextSequence(chatRoomId: Long): Long{
-        val key = "${prefix}:${chatRoomId}"
-        return redisTemplate.opsForValue().increment(key) ?: 1L
+    fun saveMessage(message: ChatMessage): ChatMessage {
+        return chatMessageRepository.save(message)
     }
 
-    fun saveMessage(message: Message): Message {
-        return messageRepository.save(message)
+    fun getNextSequence(chatRoomId: String): Long {
+        // TODO: sequence 생성 로직 구현 (Redis or DB)
+        return System.currentTimeMillis()
     }
 }
-
-
-
-

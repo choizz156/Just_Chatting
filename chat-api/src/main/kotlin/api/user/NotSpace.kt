@@ -1,4 +1,4 @@
-package com.chat.api.user
+package api.user
 
 import jakarta.validation.Constraint
 import jakarta.validation.Payload

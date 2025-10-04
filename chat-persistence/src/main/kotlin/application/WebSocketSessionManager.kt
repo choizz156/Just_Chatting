@@ -1,6 +1,6 @@
 package com.chat.persistence.application
 
-import com.chat.core.dto.ChatMessageDTO
+import com.chat.core.dto.ChatMessageDto
 import com.chat.persistence.redis.RedisMessageBroker
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PostConstruct
@@ -22,8 +22,8 @@ class WebSocketSessionManager(
     private val logger =
         LoggerFactory.getLogger(WebSocketSessionManager::class.java)
 
-    private val userSession = ConcurrentHashMap<Long, MutableSet<WebSocketSession>>()
-    private val roomSessions = ConcurrentHashMap<Long, MutableSet<WebSocketSession>>()
+    private val userSession = ConcurrentHashMap<String, MutableSet<WebSocketSession>>()
+    private val roomSessions = ConcurrentHashMap<String, MutableSet<WebSocketSession>>()
 
     @PostConstruct
     fun initialize() {
@@ -32,14 +32,13 @@ class WebSocketSessionManager(
         }
     }
 
-    fun addSession(userId: Long, session: WebSocketSession) {
+    fun addSession(userId: String, session: WebSocketSession) {
         logger.info("Adding session $userId to server")
         userSession.computeIfAbsent(userId) { mutableSetOf() }.add(session)
         session.attributes["userId"] = userId
     }
 
-    fun removeSession(session: WebSocketSession) {
-        val userId = session.attributes["userId"] as? Long ?: return
+    fun removeSession(userId: String, session: WebSocketSession) {
         userSession[userId]?.remove(session)
 
         if (userSession[userId].isNullOrEmpty()) {
@@ -56,7 +55,7 @@ class WebSocketSessionManager(
         }
     }
 
-    fun leaveRoom(userId: Long, roomId: Long) {
+    fun leaveRoom(userId: String, roomId: String) {
         val userSessions = userSession[userId] ?: return
         val sessionsInRoom = roomSessions[roomId] ?: return
 
@@ -73,13 +72,13 @@ class WebSocketSessionManager(
             val serverRoomKey = "$SERVER_ROOMS_KEY_PREFIX$serverId"
 
             redisMessageBroker.unsubscribeFromRoom(roomId)
-            redisTemplate.opsForSet().remove(serverRoomKey, roomId.toString())
+            redisTemplate.opsForSet().remove(serverRoomKey, roomId)
 
             logger.info("No users left in room $roomId on this server. Unsubscribed and removed from Redis set $serverRoomKey.")
         }
     }
 
-    fun joinRoom(userId: Long, roomId: Long) {
+    fun joinRoom(userId: String, roomId: String) {
         val sessions = if (userSession[userId].isNullOrEmpty()) return else userSession[userId]!!
 
         sessions.forEach { userSession ->
@@ -90,18 +89,18 @@ class WebSocketSessionManager(
         val serverRoomKey = "${SERVER_ROOMS_KEY_PREFIX}$serverId"
 
         val wasAlreadySubscribed =
-            redisTemplate.opsForSet().isMember(serverRoomKey, roomId.toString()) == true
+            redisTemplate.opsForSet().isMember(serverRoomKey, roomId) == true
 
         if (!wasAlreadySubscribed) {
             redisMessageBroker.subscribeToRoom(roomId)
         }
 
-        redisTemplate.opsForSet().add(serverRoomKey, roomId.toString())
+        redisTemplate.opsForSet().add(serverRoomKey, roomId)
 
         logger.info("Joined $roomId for $userId $serverId to server $serverRoomKey")
     }
 
-    fun sendMessageToLocalRoom(roomId: Long, message: ChatMessageDTO?, excludeUserId: Long? = null) {
+    fun sendMessageToLocalRoom(roomId: String, message: ChatMessageDto?, excludeUserId: String? = null) {
 
         val sessionsInRoom = if(roomSessions[roomId].isNullOrEmpty()) return else roomSessions[roomId]!!
 
@@ -119,19 +118,29 @@ class WebSocketSessionManager(
         }
 
         if (closedSessions.isNotEmpty()) {
-            closedSessions.forEach { removeSession(it) }
+            closedSessions.forEach { session ->
+                val userId = session.attributes["userId"] as? String
+                if (userId != null) {
+                    removeSession(userId, session)
+                }
+            }
             logger.info("closed session :: count = ${closedSessions.size}")
         }
     }
 
-    fun isUserOnlineLocally(userId: Long): Boolean {
+    fun isUserOnlineLocally(userId: String): Boolean {
         val sessions = userSession[userId] ?: return false
         if (sessions.isEmpty()) return false
 
         val (openSession, closedSessions) = sessions.partition { it.isOpen }
 
         if (closedSessions.isNotEmpty()) {
-            closedSessions.forEach { removeSession(it) }
+            closedSessions.forEach { session ->
+                val userId = session.attributes["userId"] as? String
+                if (userId != null) {
+                    removeSession(userId, session)
+                }
+            }
         }
 
         return openSession.isNotEmpty()
@@ -151,7 +160,7 @@ class WebSocketSessionManager(
         }
     }
 
-    private fun removeUserSession(userId: Long) {
+    private fun removeUserSession(userId: String) {
         userSession.remove(userId)
     }
 
@@ -163,7 +172,7 @@ class WebSocketSessionManager(
         val subscribedRooms = redisTemplate.opsForSet().members(serverRoomKey) ?: emptySet()
 
         subscribedRooms.forEach { roomIdStr ->
-            roomIdStr.toLongOrNull()?.let { redisMessageBroker.unsubscribeFromRoom(it) }
+            redisMessageBroker.unsubscribeFromRoom(roomIdStr)
         }
 
         redisTemplate.delete(serverRoomKey)
@@ -171,7 +180,7 @@ class WebSocketSessionManager(
     }
 
     fun existJoiningRoomAlready(roomId: String, userId: String): Boolean {
-        val sessions = roomSessions[roomId.toLong()] ?: return false
+        val sessions = roomSessions[roomId] ?: return false
 
         sessions.forEach { session ->
             if(session.attributes["userId"] == userId)

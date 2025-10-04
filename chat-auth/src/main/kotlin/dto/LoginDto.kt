@@ -9,7 +9,7 @@ data class LoginDto(
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class UserResponseDto(
-    val id: Long,
+    val id: String,
     val email: String,
     val nickname: String,
 ) {

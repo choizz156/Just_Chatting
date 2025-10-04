@@ -1,7 +1,5 @@
 package com.chat.core.domain.entity
 
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
@@ -15,11 +13,10 @@ data class ChatRoomMember(
     @Id
     val id: ObjectId? = null,
 
-    val chatRoomId: String,
+    val chatRoomId: ObjectId? = null,
 
-    val userId: String,
+    val userId: ObjectId? = null,
 
-    @Enumerated(EnumType.STRING)
     val role: MemberRole = MemberRole.MEMBER,
 
     val isActive: Boolean = true,

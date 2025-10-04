@@ -1,49 +1,31 @@
 package com.chat.core.dto
 
-import com.chat.core.application.dto.UserDto
 import com.chat.core.domain.entity.ChatRoomType
-import com.chat.core.domain.entity.MemberRole
 import com.chat.core.domain.entity.MessageType
-import jakarta.validation.constraints.NotNull
+import com.chat.core.domain.entity.MemberRole
+import com.chat.core.application.dto.UserDto
 import java.time.LocalDateTime
+
+data class ChatRoomContext(
+    val name: String,
+    val description: String? = null,
+    val type: ChatRoomType = ChatRoomType.GROUP,
+    val imageUrl: String? = null,
+    val maxMembers: Int = 100,
+)
 
 data class ChatRoomDto(
     val id: String,
     val name: String,
-    val description: String?,
+    val description: String? = null,
     val type: ChatRoomType,
-    val imageUrl: String?,
+    val imageUrl: String? = null,
     val isActive: Boolean,
     val maxMembers: Int,
     val memberCount: Int,
     val createdBy: UserDto,
     val createdAt: LocalDateTime,
-    val lastMessage: ChatMessageDto?
-)
-
-data class ChatRoomContext(
-    val name: String,
-
-    val description: String?,
-
-    val type: ChatRoomType,
-
-    val imageUrl: String?,
-
-    val maxMembers: Int = 100,
-)
-
-data class MessageDto(
-    val id: String,
-    val chatRoomId: Long,
-    val sender: UserDto,
-    val type: MessageType,
-    val content: String?,
-    val isEdited: Boolean,
-    val isDeleted: Boolean,
-    val createdAt: LocalDateTime,
-    val editedAt: LocalDateTime?,
-    val sequenceNumber: Long = 0
+    val lastMessage: ChatMessageDto? = null
 )
 
 data class ChatMessageDto(
@@ -56,45 +38,36 @@ data class ChatMessageDto(
     val isDeleted: Boolean,
     val createdAt: LocalDateTime,
     val editedAt: LocalDateTime?,
-    val sequenceNumber: Long = 0
+    val sequenceNumber: Long,
 )
 
 data class SendMessageRequest(
-    @field:NotNull(message = "채팅방 ID는 필수입니다")
     val chatRoomId: String,
-
-    @field:NotNull(message = "메시지 타입은 필수입니다")
-    val type: MessageType,
-
-    val content: String?
-)
-
-data class MessagePageRequest(
-    val chatRoomId: String,
-    val cursor: Long? = null,
-    val limit: Int = 50,
-    val direction: MessageDirection = MessageDirection.BEFORE
-)
-
-enum class MessageDirection {
-    BEFORE,
-    AFTER
-}
-
-data class MessagePageResponse(
-    val messages: List<ChatMessageDto>,
-    val nextCursor: Long?,
-    val prevCursor: Long?,
-    val hasNext: Boolean,
-    val hasPrev: Boolean
+    val content: String,
+    val type: MessageType = MessageType.TEXT
 )
 
 data class ChatRoomMemberDto(
     val id: String,
-    val user: UserDto,
+    val chatRoomId: String,
+    val userId: String,
     val role: MemberRole,
     val isActive: Boolean,
     val lastReadMessageId: Long?,
     val joinedAt: LocalDateTime,
     val leftAt: LocalDateTime?
+)
+
+data class MessagePageRequest(
+    val roomId: String,
+    val size: Int = 20,
+    val lastMessageId: String? = null,
+    val lastMessageTimestamp: LocalDateTime? = null
+)
+
+data class MessagePageResponse(
+    val messages: List<ChatMessageDto>,
+    val hasNext: Boolean,
+    val lastMessageId: String?,
+    val lastMessageTimestamp: LocalDateTime?
 )

@@ -1,36 +1,19 @@
 package com.chat.persistence.repository
 
 import com.chat.core.domain.entity.User
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.jpa.repository.Query
+import org.bson.types.ObjectId
+import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
-import java.time.LocalDateTime
 
 @Repository
-interface UserRepository : JpaRepository<User, Long> {
-
+interface UserRepository : MongoRepository<User, ObjectId> {
     fun findByEmail(email: String): User?
-
     fun existsByEmail(email: String): Boolean
     fun existsByNickname(nickname: String): Boolean
-
-    @Modifying
-    @Query("UPDATE User u SET u.lastSeenAt = :lastSeenAt WHERE u.id = :userId")
-    fun updateLastSeenAt(userId: Long, lastSeenAt: LocalDateTime)
-
-    @Query(
-        "SELECT u FROM User  u WHERE " +
-                "lower(u.email) like lower(concat('%',:query, '%')) or " +
-                "lower(u.nickname) like lower(concat('%', :query, '%'))"
-    )
-    fun searchUsers(query: String, pageable: Pageable): Page<User>
 }
 
 fun UserRepository.findByUsernameOrThrow(email: String): User =
     findByEmail(email) ?: throw IllegalArgumentException("이메일이나 비밀번호를 확인해주세요")
 
-fun UserRepository.findByIdOrThrow(userId: Long): User =
+fun UserRepository.findByIdOrThrow(userId: ObjectId): User =
     findById(userId).orElseThrow { IllegalArgumentException("사용자를 찾을 수 없습니다: $userId") }

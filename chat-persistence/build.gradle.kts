@@ -1,7 +1,6 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
-    kotlin("plugin.jpa")
     id("io.spring.dependency-management")
 }
 
@@ -13,8 +12,6 @@ dependencyManagement {
 
 dependencies {
     implementation(project(":chat-core"))
-
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     //security password
     implementation("org.springframework.security:spring-security-crypto")
@@ -39,7 +36,6 @@ dependencies {
     testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.21.0")
     testImplementation("org.apache.commons:commons-lang3:3.18.0")
 
-    runtimeOnly("com.h2database:h2")
-    runtimeOnly("org.postgresql:postgresql")
+
 
 }

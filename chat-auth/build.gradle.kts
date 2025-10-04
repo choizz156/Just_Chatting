@@ -1,8 +1,7 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
-    kotlin("plugin.jpa")
-    id("org.springframework.boot") version "3.3.4"
+    id("java-library")
     id("io.spring.dependency-management")
 }
 
@@ -18,7 +17,7 @@ dependencies {
     implementation(project(":chat-persistence"))
     implementation(project(":chat-core"))
 
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")

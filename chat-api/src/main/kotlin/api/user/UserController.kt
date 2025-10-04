@@ -1,4 +1,4 @@
-package com.chat.api.user
+package api.user
 
 import api.ApiResponseDto
 import com.chat.core.application.UserService
@@ -15,7 +15,7 @@ class UserController(
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    fun join(@Valid @RequestBody joinDto: CreateUserRequest): ApiResponseDto<Long> {
+    fun join(@Valid @RequestBody joinDto: CreateUserRequest): ApiResponseDto<String> {
 
         val joinContext = toContext(joinDto)
         val user = userService.createUser(joinContext)

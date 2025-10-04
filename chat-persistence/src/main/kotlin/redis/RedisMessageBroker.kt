@@ -1,6 +1,6 @@
 package com.chat.persistence.redis
 
-import com.chat.core.dto.ChatMessageDTO
+import com.chat.core.dto.ChatMessageDto
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
@@ -23,8 +23,8 @@ class RedisMessageBroker(
     private val logger = LoggerFactory.getLogger(RedisMessageBroker::class.java)
     private val serverId = System.getenv("HOSTNAME") ?: "server-${System.currentTimeMillis()}"
     private val processedMessages = ConcurrentHashMap<String, Long>()
-    private val subscribeRooms = ConcurrentHashMap.newKeySet<Long>()
-    private var localMessageHandler: ((Long, ChatMessageDTO) -> Unit)? = null
+    private val subscribeRooms = ConcurrentHashMap.newKeySet<String>()
+    private var localMessageHandler: ((String, ChatMessageDto) -> Unit)? = null
 
     fun getServerId() = serverId
 
@@ -54,11 +54,11 @@ class RedisMessageBroker(
         logger.info("Removing RedisMessageListenerContainer")
     }
 
-    fun setLocalMessageHandler(handler: (Long, ChatMessageDTO) -> Unit) {
+    fun setLocalMessageHandler(handler: (String, ChatMessageDto) -> Unit) {
         this.localMessageHandler = handler
     }
 
-    fun subscribeToRoom(roomId: Long) {
+    fun subscribeToRoom(roomId: String) {
         if (subscribeRooms.add(roomId)) {
             val topic = ChannelTopic("chat.room.$roomId")
             messageListenerContainer.addMessageListener(this, topic)
@@ -68,7 +68,7 @@ class RedisMessageBroker(
         }
     }
 
-    fun unsubscribeFromRoom(roomId: Long) {
+    fun unsubscribeFromRoom(roomId: String) {
         if (subscribeRooms.remove(roomId)) {
             val topic = ChannelTopic("chat.room.$roomId")
             messageListenerContainer.removeMessageListener(this, topic)
@@ -114,7 +114,7 @@ class RedisMessageBroker(
         }
     }
 
-    fun broadcastToRoom(roomId: Long, message: ChatMessageDTO, excludeSeverId: String? = null) {
+    fun broadcastToRoom(roomId: String, message: ChatMessageDto, excludeSeverId: String? = null) {
         try {
             val message = DistributedMessage(
                 id = "$serverId-${System.currentTimeMillis()}-${System.nanoTime()}",
@@ -150,9 +150,9 @@ class RedisMessageBroker(
     data class DistributedMessage(
         val id: String,
         val serverId: String,
-        val roomId: Long,
+        val roomId: String,
         val excludeSeverId: String?,
         val timestamp: LocalDateTime,
-        val payload: ChatMessageDTO
+        val payload: ChatMessageDto
     )
 }

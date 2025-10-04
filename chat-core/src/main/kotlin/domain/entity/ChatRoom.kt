@@ -1,11 +1,10 @@
 package com.chat.core.domain.entity
 
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
@@ -20,7 +19,6 @@ data class ChatRoom(
 
     val description: String? = null,
 
-    @Enumerated(EnumType.STRING)
     val type: ChatRoomType = ChatRoomType.GROUP,
 
     val imageUrl: String? = null,
@@ -29,7 +27,8 @@ data class ChatRoom(
 
     val maxMembers: Int = 100,
 
-    val createdBy: String? = null,
+    @DBRef
+    val createdBy: User? = null,
 
     @CreatedDate
     var createdAt: LocalDateTime = LocalDateTime.now(),

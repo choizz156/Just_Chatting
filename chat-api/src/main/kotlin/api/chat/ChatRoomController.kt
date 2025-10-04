@@ -18,31 +18,31 @@ class ChatRoomController(
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     fun createChatRoom(
-        @RequestParam createdBy: Long,
+        @RequestParam createdBy: String,
         @Valid @RequestBody request: CreateChatRoomRequest
     ): ApiResponseDto<ChatRoomDto> {
         val chatRoomContext = toChatRoomContext(request)
         val chatRoom = chatServiceV1.createChatRoom(chatRoomContext, createdBy)
-        return ApiResponseDto(chatRoom)
+        return ApiResponseDto.success(chatRoom)
     }
 
     @PostMapping("/{id}/members")
     fun joinChatRoom(
-        @PathVariable(value = "id") roomId: Long,
+        @PathVariable(value = "id") roomId: String,
         request: HttpServletRequest,
     ){
         val session = request.session ?: throw IllegalAccessException("no session")
-        val userId = session.getAttribute("userId") as? Long ?: throw IllegalAccessException("user id is null")
+        val userId = session.getAttribute("userId") as? String ?: throw IllegalAccessException("user id is null")
         chatServiceV1.joinChatRoom(roomId, userId)
     }
 
     @DeleteMapping("/{id}/members")
     fun leaveChatRoom(
-        @PathVariable(value = "id") roomId: Long,
+        @PathVariable(value = "id") roomId: String,
         request: HttpServletRequest,
     ){
         val session = request.session ?: throw IllegalAccessException("no session")
-        val userId = session.getAttribute("userId") as? Long ?: throw IllegalAccessException("user id is null")
+        val userId = session.getAttribute("userId") as? String ?: throw IllegalAccessException("user id is null")
         chatServiceV1.leaveChatRoom(roomId, userId)
     }
 
@@ -59,6 +59,3 @@ class ChatRoomController(
     }
 
 }
-
-
-

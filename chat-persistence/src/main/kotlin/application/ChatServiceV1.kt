@@ -3,12 +3,16 @@ package com.chat.persistence.application
 import com.chat.core.application.ChatService
 import com.chat.core.application.Validator
 import com.chat.core.domain.entity.*
-import com.chat.core.dto.*
+import com.chat.core.dto.ChatMessageDto
+import com.chat.core.dto.ChatRoomContext
+import com.chat.core.dto.ChatRoomDto
+import com.chat.core.dto.SendMessageRequest
 import com.chat.persistence.redis.RedisMessageBroker
-import com.chat.persistence.repository.ChatRoomMemberRepository1
-import com.chat.persistence.repository.ChatRoomRepository1
+import com.chat.persistence.repository.ChatRoomMemberRepository
+import com.chat.persistence.repository.ChatRoomRepository
 import com.chat.persistence.repository.UserRepository
 import com.chat.persistence.repository.findByIdOrThrow
+import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Caching
@@ -18,8 +22,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class ChatServiceV1(
-    private val chatRoomRepository1: ChatRoomRepository1,
-    private val chatRoomMemberRepository1: ChatRoomMemberRepository1,
+    private val chatRoomRepository: ChatRoomRepository,
+    private val chatRoomMemberRepository: ChatRoomMemberRepository,
     private val userRepository: UserRepository,
     private val redisMessageBroker: RedisMessageBroker,
     private val messageService: MessageService,
@@ -33,15 +37,15 @@ class ChatServiceV1(
     @CacheEvict(value = ["chatRooms"], allEntries = true)
     override fun createChatRoom(
         request: ChatRoomContext,
-        createdBy: Long
+        createdBy: String
     ): ChatRoomDto {
-        val creator = userRepository.findByIdOrThrow(createdBy)
+        val creator = userRepository.findByIdOrThrow(ObjectId(createdBy))
 
         val savedRoom = saveChatRoom(request, creator)
         saveChatRoomMember(savedRoom, creator)
 
-        if (webSocketSessionManager.isUserOnlineLocally(creator.id)) {
-            webSocketSessionManager.joinRoom(creator.id, savedRoom.id)
+        if (webSocketSessionManager.isUserOnlineLocally(creator.id.toString())) {
+            webSocketSessionManager.joinRoom(creator.id.toString(), savedRoom.id.toString())
         }
 
         return dtoConverter.chatRoomToDto(savedRoom)
@@ -53,19 +57,18 @@ class ChatServiceV1(
             CacheEvict(value = ["chatRooms"], key = "#roomId"),
         ]
     )
-    override fun joinChatRoom(roomId: Long, userId: Long) {
-
-        val chatRoom = chatRoomRepository1.findByIdOrThrow(roomId)
-        val user = userRepository.findByIdOrThrow(userId)
+    override fun joinChatRoom(roomId: String, userId: String) {
+        val chatRoom = chatRoomRepository.findByIdOrThrow(roomId)
+        val user = userRepository.findByIdOrThrow(ObjectId(userId))
 
         validator.isChatRoomMemberAlready(roomId, userId)
 
-        val member = ChatRoomMember1(
-            chatRoom1 = chatRoom,
-            user = user,
+        val member = ChatRoomMember(
+            chatRoomId = chatRoom.id,
+            userId = user.id,
             role = MemberRole.MEMBER
         )
-        chatRoomMemberRepository1.save(member)
+        chatRoomMemberRepository.save(member)
 
         if (webSocketSessionManager.isUserOnlineLocally(userId)) {
             webSocketSessionManager.joinRoom(userId, roomId)
@@ -78,8 +81,16 @@ class ChatServiceV1(
             CacheEvict(value = ["chatRooms"], key = "#roomId")
         ]
     )
-    override fun leaveChatRoom(roomId: Long, userId: Long) {
-        chatRoomMemberRepository1.leaveChatRoom(roomId, userId)
+    override fun leaveChatRoom(roomId: String, userId: String) {
+        val member = chatRoomMemberRepository.findByChatRoomIdAndUserIdAndIsActiveTrue(roomId, userId)
+            .orElseThrow { NoSuchElementException("Member not found") }
+
+        val updatedMember = member.copy(
+            isActive = false,
+            leftAt = java.time.LocalDateTime.now()
+        )
+        chatRoomMemberRepository.save(updatedMember)
+
         if (webSocketSessionManager.isUserOnlineLocally(userId)) {
             webSocketSessionManager.leaveRoom(userId, roomId)
         }
@@ -87,56 +98,66 @@ class ChatServiceV1(
 
     override fun sendMessage(
         request: SendMessageRequest,
-        senderId: Long
-    ): MessageDto {
-
+        senderId: String
+    ): ChatMessageDto {
         validator.isNotChatRoomMember(request.chatRoomId, senderId)
 
-        val savedMessage = saveMessage(request, senderId)
-        val chatMessage = dtoConverter.toChatMessage(savedMessage)
+        val sender = userRepository.findByIdOrThrow(ObjectId(senderId))
+        val savedMessage = saveMessage(request, sender)
+        val chatMessage = dtoConverter.messageToDto(savedMessage)
 
         publishMessage(request, chatMessage)
 
-        return dtoConverter.messageToDto(savedMessage)
+        return chatMessage
     }
-
 
     private fun saveMessage(
         request: SendMessageRequest,
-        senderId: Long
-    ): Message {
-        val chatRoom = chatRoomRepository1.findByIdOrThrow(request.chatRoomId)
-        val sender = userRepository.findByIdOrThrow(senderId)
+        sender: User
+    ): ChatMessage {
         val sequenceNumber = messageService.getNextSequence(request.chatRoomId)
 
-        val message = Message(
+        val message = ChatMessage(
             content = request.content,
             sequenceNumber = sequenceNumber,
             sender = sender,
-            chatRoom1 = chatRoom,
+            chatRoomId = request.chatRoomId,
             type = request.type
         )
 
-        val savedMessage = messageService.saveMessage(message)
-        return savedMessage
+        return messageService.saveMessage(message)
     }
 
     private fun publishMessage(
         request: SendMessageRequest,
-        chatMessageDTO: ChatMessageDTO
+        chatMessageDto: ChatMessageDto
     ) {
-        webSocketSessionManager.sendMessageToLocalRoom(request.chatRoomId, chatMessageDTO)
-        broadcastMessage(request, chatMessageDTO)
+        // WebSocketSessionManager와 RedisMessageBroker의 DTO 타입 통일 필요
+        // 우선 임시로 ChatMessageDto를 생성하여 전달
+        val tempDto = ChatMessageDto(
+            id = chatMessageDto.id,
+            content = chatMessageDto.content,
+            type = chatMessageDto.type,
+            sender = chatMessageDto.sender,
+            sequenceNumber = chatMessageDto.sequenceNumber,
+            chatRoomId = chatMessageDto.chatRoomId,
+            isEdited = chatMessageDto.isEdited,
+            isDeleted = chatMessageDto.isDeleted,
+            createdAt = chatMessageDto.createdAt,
+            editedAt = chatMessageDto.editedAt
+        )
+        webSocketSessionManager.sendMessageToLocalRoom(request.chatRoomId, tempDto)
+        broadcastMessage(request, tempDto)
     }
 
     private fun broadcastMessage(
         request: SendMessageRequest,
-        chatMessageDTO: ChatMessageDTO
+        chatMessageDto: ChatMessageDto
     ) {
         try {
             redisMessageBroker.broadcastToRoom(
                 roomId = request.chatRoomId,
-                message = chatMessageDTO,
+                message = chatMessageDto,
                 excludeSeverId = redisMessageBroker.getServerId()
             )
         } catch (e: Exception) {
@@ -148,13 +169,12 @@ class ChatServiceV1(
         savedRoom: ChatRoom,
         creator: User
     ) {
-        val ownerMember = ChatRoomMember1(
-            chatRoom1 = savedRoom,
-            user = creator,
-            role = MemberRole.OWNER,
+        val ownerMember = ChatRoomMember(
+            chatRoomId = savedRoom.id,
+            userId = creator.id,
+            role = MemberRole.OWNER
         )
-
-        chatRoomMemberRepository1.save(ownerMember)
+        chatRoomMemberRepository.save(ownerMember)
     }
 
     private fun saveChatRoom(
@@ -170,11 +190,6 @@ class ChatServiceV1(
             createdBy = creator
         )
 
-        val savedRoom = chatRoomRepository1.save(chatRoom)
-        return savedRoom
+        return chatRoomRepository.save(chatRoom)
     }
 }
-
-
-
-

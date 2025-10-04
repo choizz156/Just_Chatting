@@ -1,8 +1,7 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
-    kotlin("plugin.jpa")
-    id("org.springframework.boot") version "3.3.4"
+    id("java-library")
     id("io.spring.dependency-management")
 }
 
@@ -15,8 +14,6 @@ dependencyManagement {
 dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-validation")
-
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     implementation("org.springframework.data:spring-data-commons")
 

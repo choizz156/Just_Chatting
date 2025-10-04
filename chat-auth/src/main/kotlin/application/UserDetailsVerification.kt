@@ -3,6 +3,7 @@ package com.chat.auth.application
 import com.chat.core.domain.entity.UserRole
 import com.chat.persistence.repository.UserRepository
 import com.chat.persistence.repository.findByUsernameOrThrow
+import org.bson.types.ObjectId
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
@@ -22,7 +23,7 @@ class UserDetailsVerification(
                 user.email,
                 user.nickname,
                 user.password,
-                user.id,
+                user.id.toString(),
                 user.role
             )
 
@@ -35,6 +36,6 @@ data class UserAttribute(
     val email: String,
     val nickname: String,
     val password: String,
-    val userId: Long,
+    val userId: String,
     val role: UserRole
 )
