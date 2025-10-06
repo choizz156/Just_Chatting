@@ -4,6 +4,8 @@ import com.chat.auth.application.UserDetailsVerification
 import com.chat.auth.filter.EmailPasswordAuthFilter
 import com.chat.auth.handler.AuthDeniedHandler
 import com.chat.auth.handler.AuthEntryPointHandler
+import com.chat.auth.handler.AuthFailureHandler
+import com.chat.auth.handler.AuthSuccessHandler
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -47,12 +49,12 @@ class SecurityConfig(
             .formLogin { it.disable() }
             .cors { cors -> cors.configurationSource(CorsConfig().corsFilter()) }
             .sessionManagement {
-                it.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                it.sessionAuthenticationStrategy(sessionAuthenticationStrategy())
                     .sessionFixation()
                     .changeSessionId()
                     .maximumSessions(1)
                     .maxSessionsPreventsLogin(false)
-                    .expiredUrl("/login")
+                    .expiredUrl("http://localhost:5173/")
             }
             .addFilterBefore(
                 emailPasswordFilter(),
@@ -83,6 +85,8 @@ class SecurityConfig(
 
         filter.setAuthenticationManager(authenticationManager())
         filter.setSessionAuthenticationStrategy(sessionAuthenticationStrategy())
+        filter.setAuthenticationFailureHandler(AuthFailureHandler(objectMapper))
+        filter.setAuthenticationSuccessHandler(AuthSuccessHandler(objectMapper))
         filter.setSecurityContextRepository(HttpSessionSecurityContextRepository())
 
         return filter

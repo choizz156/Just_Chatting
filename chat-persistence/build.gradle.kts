@@ -35,7 +35,5 @@ dependencies {
     implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.21.0")
     testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.21.0")
     testImplementation("org.apache.commons:commons-lang3:3.18.0")
-
-
-
+    implementation("org.apache.commons:commons-lang3:3.18.0")
 }

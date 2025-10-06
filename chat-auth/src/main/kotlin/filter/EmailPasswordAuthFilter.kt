@@ -17,9 +17,12 @@ class EmailPasswordAuthFilter(
         response: HttpServletResponse
     ): Authentication? {
 
-        val (email, password) = objectMapper.readValue(request.inputStream, LoginDto::class.java)
+        val loginDto: LoginDto = objectMapper.readValue(request.inputStream, LoginDto::class.java)
 
-        val token = UsernamePasswordAuthenticationToken.unauthenticated(email, password)
+        val token = UsernamePasswordAuthenticationToken.unauthenticated(
+            loginDto.username,
+            loginDto.password
+        )
 
         token.details = super.authenticationDetailsSource.buildDetails(request)
 

@@ -1,31 +1,11 @@
 spring:
 
-  # PostgreSQL 데이터베이스
-  datasource:
-    url:
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: create
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        jdbc:
-          batch_size: 50
-        order_inserts: true
-        order_updates: true
-        cache:
-          use_second_level_cache: false
-          use_query_cache: false
-
   data:
     redis:
       host: localhost
       port: 6380
+    mongodb:
+      uri: mongodb://root:example@localhost:27017/testdb?authSource=admin
 
     # 캐시 설정
   cache:
@@ -34,8 +14,10 @@ spring:
       time-to-live: 30m
       cache-null-values: false
 
+
+
 server:
-  port: 8081
+  port: 8080
   tomcat:
     threads:
       max: 300

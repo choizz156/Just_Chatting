@@ -25,15 +25,16 @@ class AuthSuccessHandler(
         response.setContentType(MediaType.APPLICATION_JSON_VALUE)
         response.setStatus(HttpServletResponse.SC_OK)
 
-        val userInfo = authentication.details as CustomUserPrincipal
+        val principal = authentication.principal as CustomUserPrincipal
+        val userInfo = principal.attribute
 
         val userData =
             objectMapper.writeValueAsString(
                 ApiResponseDto(
                     UserResponseDto(
-                        userInfo.attribute.userId,
-                        userInfo.attribute.email,
-                        userInfo.attribute.nickname
+                        userInfo.userId,
+                        userInfo.email,
+                        userInfo.nickname
                     ),
                 )
             )

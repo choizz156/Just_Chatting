@@ -1,4 +1,4 @@
-package api.user
+package com.chat.api.user
 
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
@@ -17,12 +17,12 @@ data class CreateUserRequest(
     val password: String,
 
     @NotSpace
-    @field:NotBlank(message = "표시 이름은 필수입니다")
+    @field:NotBlank(message = "닉네임은 필수입니다")
     @field:Size(min = 1, max = 50, message = "표시 이름은 1-50자 사이여야 합니다")
-    val displayName: String
+    val nickname: String
 )
 
-data class LoginRequest(
+data class LoginDto(
     @field:NotBlank(message = "사용자명은 필수입니다")
     val username: String,
 

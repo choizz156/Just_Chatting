@@ -1,12 +1,8 @@
 package com.chat.app
 
-import jakarta.persistence.EntityListeners
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.runApplication
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 
 @SpringBootApplication(
@@ -19,10 +15,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
         "com.chat.websocket",
     ]
 )
-@EnableJpaAuditing
-@EnableJpaRepositories(basePackages = ["com.chat.persistence.repository"])
 @EntityScan(basePackages = ["com.chat.core.domain.entity"])
-@EntityListeners(AuditingEntityListener::class)
 @EnableMongoRepositories(basePackages = ["com.chat.persistence.repository"])
 class JustChatApplication
 

@@ -2,6 +2,7 @@ package com.chat.persistence.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import org.slf4j.LoggerFactory
@@ -39,7 +40,7 @@ class EmbeddedRedisConfig {
     }
 
     @Bean
-    fun messageListenerContainer(connectionFactory: LettuceConnectionFactory): RedisMessageListenerContainer {
+    fun redisMessageListenerContainer(connectionFactory: LettuceConnectionFactory): RedisMessageListenerContainer {
         val container = RedisMessageListenerContainer()
         container.setConnectionFactory(connectionFactory)
         return container
@@ -49,6 +50,7 @@ class EmbeddedRedisConfig {
     fun objectMapper(): ObjectMapper {
         val mapper = ObjectMapper()
         mapper.registerModule(JavaTimeModule())
+        mapper.registerModule(KotlinModule.Builder().build())
         return mapper
     }
 
@@ -63,8 +65,8 @@ class EmbeddedRedisConfig {
                     .port(port)
                     .setting("daemonize no")
                     .setting("appendonly no")
-                    .setting("save \"\"")
-                    .setting("dbfilename \"\"")
+                    .setting("save \" \"")
+                    .setting("dbfilename \" \"")
                     .setting("stop-writes-on-bgsave-error no")
                     .build()
 

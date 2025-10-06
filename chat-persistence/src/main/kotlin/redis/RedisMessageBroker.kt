@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class RedisMessageBroker(
     private val redisTemplate: RedisTemplate<String, String>,
-    private val messageListenerContainer: RedisMessageListenerContainer,
+    private val redisMessageListenerContainer: RedisMessageListenerContainer,
     private val objectMapper: ObjectMapper
 ) : MessageListener {
 
@@ -62,7 +62,7 @@ class RedisMessageBroker(
     fun subscribeToRoom(roomId: String) {
         if (subscribeRooms.add(roomId)) {
             val topic = ChannelTopic("chat.room.$roomId")
-            messageListenerContainer.addMessageListener(this, topic)
+            redisMessageListenerContainer.addMessageListener(this, topic)
             logger.info("Subscribed to $roomId")
         } else {
             logger.error("Room $roomId does not exist")
@@ -72,7 +72,7 @@ class RedisMessageBroker(
     fun unsubscribeFromRoom(roomId: String) {
         if (subscribeRooms.remove(roomId)) {
             val topic = ChannelTopic("chat.room.$roomId")
-            messageListenerContainer.removeMessageListener(this, topic)
+            redisMessageListenerContainer.removeMessageListener(this, topic)
             logger.info("Unsubscribed from $roomId")
             return
         }
