@@ -2,14 +2,14 @@ package com.chat.core.application.dto
 
 import com.chat.core.domain.entity.UserRole
 import jakarta.validation.constraints.NotBlank
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 
 data class UserDto(
     val id: String,
     val email: String,
     val nickname: String,
-    val profileImageUrl: String?,
-    val status: String?,
+    val profileImage: ByteArray?,
     val isActive: Boolean,
     val roles: UserRole,
     val lastSeenAt: LocalDateTime?,
@@ -21,7 +21,9 @@ data class CreateUserContext(
 
     val password: String,
 
-    val nickname: String
+    val nickname: String,
+
+    val profileImage: MultipartFile?
 )
 
 data class LoginContext(

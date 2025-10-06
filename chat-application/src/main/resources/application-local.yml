@@ -1,5 +1,10 @@
 spring:
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+
   data:
     redis:
       host: localhost
@@ -32,8 +37,9 @@ server:
     session:
       cookie:
         http-only: true
-#        same-site: lax
-#        secure: off
+  #        same-site: lax
+  #        secure: off
+
 
 # 로깅 설정
 logging:

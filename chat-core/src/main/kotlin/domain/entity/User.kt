@@ -15,6 +15,7 @@ data class User(
     val password: String,
     val nickname: String,
     val profileImageUrl: String? = null,
+    val profileImage: ProfileImage? = null,
     val status: String? = null,
     val isActive: Boolean = true,
     val lastSeenAt: LocalDateTime? = null,
@@ -26,6 +27,12 @@ data class User(
     var updatedAt: LocalDateTime = LocalDateTime.now()
 )
 
+data class ProfileImage(
+    val data: ByteArray?,
+    val contentType: String?,
+    val filename: String?,
+    val storedFileName: String?,
+)
 enum class UserStatus {
     ACTIVE, WITH_DRAW;
 }
@@ -33,3 +40,4 @@ enum class UserStatus {
 enum class UserRole {
     USER, ADMIN, HOST, GUEST;
 }
+

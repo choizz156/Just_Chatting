@@ -3,6 +3,7 @@ package com.chat.api.user
 import api.ApiResponseDto
 import com.chat.core.application.UserService
 import com.chat.core.application.dto.CreateUserContext
+import com.chat.core.application.dto.UserDto
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -16,12 +17,12 @@ class UserController(
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    fun join(@Valid @RequestBody joinDto: CreateUserRequest): ApiResponseDto<String> {
+    fun join(@Valid @ModelAttribute joinDto: CreateUserRequest): ApiResponseDto<UserDto> {
 
         val joinContext = toContext(joinDto)
-        val user = userService.createUser(joinContext)
+        val userDto = userService.createUser(joinContext)
 
-        return ApiResponseDto(user.id)
+        return ApiResponseDto(userDto)
     }
 
     @GetMapping
@@ -30,6 +31,6 @@ class UserController(
     }
 
     fun toContext(request: CreateUserRequest): CreateUserContext {
-        return CreateUserContext(request.email, request.password, request.nickname)
+        return CreateUserContext(request.email, request.password, request.nickname, request.profileImage)
     }
 }

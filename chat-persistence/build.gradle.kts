@@ -31,6 +31,8 @@ dependencies {
     //mongo db
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 
+    implementation("net.coobird:thumbnailator:0.4.14")
+
     // embeded mongoDB
     implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.21.0")
     testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.21.0")

@@ -68,12 +68,12 @@ class DtoConverter(
             id = user.id.toString(),
             email = user.email,
             nickname = user.nickname,
-            profileImageUrl = user.profileImageUrl,
             status = user.status,
             isActive = user.isActive,
             roles = user.role,
             lastSeenAt = user.lastSeenAt,
-            createdAt = user.createdAt
+            createdAt = user.createdAt,
+            profileImage = user.profileImage?.data
         )
     }
 
