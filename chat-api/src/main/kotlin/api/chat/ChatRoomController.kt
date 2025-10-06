@@ -23,7 +23,7 @@ class ChatRoomController(
     ): ApiResponseDto<ChatRoomDto> {
         val chatRoomContext = toChatRoomContext(request)
         val chatRoom = chatServiceV1.createChatRoom(chatRoomContext, createdBy)
-        return ApiResponseDto.success(chatRoom)
+        return ApiResponseDto.to(chatRoom)
     }
 
     @PostMapping("/{id}/members")

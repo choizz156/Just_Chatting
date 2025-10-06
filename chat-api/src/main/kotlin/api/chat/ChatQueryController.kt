@@ -22,25 +22,25 @@ class ChatQueryController(
         @PageableDefault(size = 20) pageable: Pageable
     ): ApiResponseDto<Page<ChatRoomDto>> {
         val chatRooms = chatQueryService.getChatRooms(userId, pageable)
-        return ApiResponseDto.success(chatRooms)
+        return ApiResponseDto.to(chatRooms)
     }
 
     @GetMapping("/rooms/search")
     fun searchChatRooms(@RequestParam query: String): ApiResponseDto<List<ChatRoomDto>> {
         val chatRooms = chatQueryService.searchChatRooms(query)
-        return ApiResponseDto.success(chatRooms)
+        return ApiResponseDto.to(chatRooms)
     }
 
     @GetMapping("/rooms/{roomId}")
     fun getChatRoom(@PathVariable roomId: String): ApiResponseDto<ChatRoomDto> {
         val chatRoom = chatQueryService.getChatRoom(roomId)
-        return ApiResponseDto.success(chatRoom)
+        return ApiResponseDto.to(chatRoom)
     }
 
     @GetMapping("/rooms/{roomId}/members")
     fun getChatRoomMembers(@PathVariable roomId: String): ApiResponseDto<List<ChatRoomMemberDto>> {
         val members = chatQueryService.getChatRoomMembers(roomId)
-        return ApiResponseDto.success(members)
+        return ApiResponseDto.to(members)
     }
 
     @GetMapping("/rooms/{roomId}/messages")
@@ -50,6 +50,6 @@ class ChatQueryController(
         @PageableDefault(size = 50) pageable: Pageable
     ): ApiResponseDto<Page<ChatMessageDto>> {
         val messages = chatQueryService.getMessages(roomId, userId, pageable)
-        return ApiResponseDto.success(messages)
+        return ApiResponseDto.to(messages)
     }
 }

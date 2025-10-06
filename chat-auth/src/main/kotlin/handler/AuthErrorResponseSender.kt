@@ -19,6 +19,7 @@ object AuthErrorResponseSender {
 
         response.status = status.value()
         response.contentType = MediaType.APPLICATION_JSON_VALUE
+        response.characterEncoding = Charsets.UTF_8.name()
 
         val errorInfo = ErrorResponse(status.value(), exception.message ?: "인증 거절")
 

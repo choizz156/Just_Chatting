@@ -4,6 +4,7 @@ import com.chat.auth.application.CustomUserPrincipal
 import com.chat.auth.dto.ApiResponseDto
 import com.chat.auth.dto.UserResponseDto
 import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.MediaType
@@ -20,8 +21,6 @@ class AuthSuccessHandler(
         response: HttpServletResponse,
         authentication: Authentication
     ) {
-//        val loginUser: LoginUser = addLoginUser(request, authentication)
-
         response.setContentType(MediaType.APPLICATION_JSON_VALUE)
         response.setStatus(HttpServletResponse.SC_OK)
 
