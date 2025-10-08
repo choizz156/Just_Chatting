@@ -1,11 +1,11 @@
-package api
+package com.chat.api
 
-import java.time.LocalDateTime
+import java.time.Instant
 
-data class ApiResponseDto<T>(val data: T, val time: LocalDateTime = LocalDateTime.now()) {
+data class ApiResponseDto<T>(val result: T, val time: Instant = Instant.now()) {
     companion object {
-        fun <T> to(data: T): ApiResponseDto<T> {
-            return ApiResponseDto(data)
+        fun <T> to(result: T): ApiResponseDto<T> {
+            return ApiResponseDto(result)
         }
     }
 }

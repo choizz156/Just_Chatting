@@ -4,9 +4,10 @@ import org.bson.types.ObjectId
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 
 @Document("chat_rooms")
@@ -15,6 +16,7 @@ data class ChatRoom(
     @Id
     val id: ObjectId? = null,
 
+    @Indexed(unique = true)
     val name: String,
 
     val description: String? = null,
@@ -27,14 +29,13 @@ data class ChatRoom(
 
     val maxMembers: Int = 100,
 
-    @DBRef
     val createdBy: User? = null,
 
     @CreatedDate
-    var createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: Instant = Instant.now(),
 
     @LastModifiedDate
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: Instant = Instant.now()
 )
 
 enum class ChatRoomType {

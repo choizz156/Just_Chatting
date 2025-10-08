@@ -6,6 +6,7 @@ import com.chat.core.domain.entity.MessageType
 import com.chat.core.dto.ErrorMessage
 import com.chat.core.dto.SendMessageRequest
 import com.chat.persistence.application.WebSocketSessionManager
+import com.chat.persistence.redis.OnlineUsers
 import com.chat.websocket.handler.ErrorCode.*
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -23,7 +24,8 @@ class ChatWebSocketHandler(
     private val sessionManager: WebSocketSessionManager,
     private val chatService: ChatService,
     private val chatQueryService: ChatQueryService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val onlineUsers: OnlineUsers,
 ) : WebSocketHandler {
 
     private val logger = LoggerFactory.getLogger(ChatWebSocketHandler::class.java)
@@ -50,6 +52,21 @@ class ChatWebSocketHandler(
         }
 
         handleTextMessage(session, userId, message.payload)
+    }
+
+
+    override fun afterConnectionClosed(session: WebSocketSession, closeStatus: CloseStatus) {
+        logger.info("WebSocket connection closed: ${closeStatus.code} - ${closeStatus.reason}")
+        cleanupSession(session)
+        onlineUsers.remove(session.getUserId().toString())
+        logger.info("logout userId = {}", session.getUserId().toString())
+    }
+
+    private fun cleanupSession(session: WebSocketSession) {
+        session.getUserId()?.let { userId ->
+            sessionManager.removeSession(userId, session)
+            logger.info("Session removed for user $userId")
+        }
     }
 
     private fun loadUserChatRooms(userId: String) {
@@ -137,18 +154,6 @@ class ChatWebSocketHandler(
             logger.error("WebSocket transport error for user: ${userId ?: "unknown"}", exception)
         }
         cleanupSession(session)
-    }
-
-    override fun afterConnectionClosed(session: WebSocketSession, closeStatus: CloseStatus) {
-        logger.info("WebSocket connection closed: ${closeStatus.code} - ${closeStatus.reason}")
-        cleanupSession(session)
-    }
-
-    private fun cleanupSession(session: WebSocketSession) {
-        session.getUserId()?.let { userId ->
-            sessionManager.removeSession(userId, session)
-            logger.info("Session removed for user $userId")
-        }
     }
 
     override fun supportsPartialMessages(): Boolean = false

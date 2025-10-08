@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional
 class ChatQueryServiceV1(
     private val chatRoomRepository: ChatRoomRepository,
     private val chatMessageRepository: ChatMessageRepository,
-    private val userRepository: UserRepository,
     private val chatRoomMemberRepository: ChatRoomMemberRepository,
     private val dtoConverter: DtoConverter
 ) : ChatQueryService {
@@ -28,7 +27,7 @@ class ChatQueryServiceV1(
 
     override fun searchChatRooms(query: String): List<ChatRoomDto> {
         val chatRooms =
-            chatRoomRepository.findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc(
+            chatRoomRepository.findByNameContainingIgnoreCaseAndIsActiveTrueOrderByIdDesc(
                 query
             )
         return chatRooms.map { dtoConverter.chatRoomToDto(it) }
@@ -39,7 +38,7 @@ class ChatQueryServiceV1(
         userId: String,
         pageable: Pageable
     ): Page<ChatMessageDto> {
-        val messages = chatMessageRepository.findByChatRoomIdOrderByCreatedAtDesc(roomId, pageable)
+        val messages = chatMessageRepository.findByChatRoomIdOrderByIdDesc(roomId, pageable)
         return messages.map { dtoConverter.messageToDto(it) }
     }
 

@@ -23,8 +23,8 @@ interface ChatRoomRepository : MongoRepository<ChatRoom, String> {
         ]
     )
     fun findChatRoomsByUserId(userId: ObjectId?, pageable: Pageable): List<ChatRoom>
-    fun findByIsActiveTrueOrderByCreatedAtDesc(): List<ChatRoom>
-    fun findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc(name: String): List<ChatRoom>
+    fun findByIsActiveTrueOrderByIdDesc(): List<ChatRoom>
+    fun findByNameContainingIgnoreCaseAndIsActiveTrueOrderByIdDesc(name: String): List<ChatRoom>
 }
 
 fun ChatRoomRepository.findByIdOrThrow(roomId: String): ChatRoom =

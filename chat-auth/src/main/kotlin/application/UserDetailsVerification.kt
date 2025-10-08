@@ -24,18 +24,19 @@ class UserDetailsVerification(
                 user.nickname,
                 user.password,
                 user.id.toString(),
-                user.role
+                user.role,
+                user.profileImage?.data
             )
 
         return CustomUserPrincipal(userAttribute)
     }
 }
 
-
 data class UserAttribute(
     val email: String,
     val nickname: String,
     val password: String,
     val userId: String,
-    val role: UserRole
+    val role: UserRole,
+    val profileImage: ByteArray? = null
 )

@@ -1,4 +1,4 @@
-package api.user
+package com.chat.api.user
 
 import jakarta.validation.Validation
 import jakarta.validation.Validator
@@ -23,7 +23,7 @@ class CreateUserRequestTest {
         val request = CreateUserRequest(
             email = "test@example.com",
             password = "password123",
-            displayName = "TestUser"
+            nickname = "TestUser"
         )
         val violations = validator.validate(request)
         assertThat(violations).isEmpty()
@@ -35,7 +35,7 @@ class CreateUserRequestTest {
         val request = CreateUserRequest(
             email = "",
             password = "password123",
-            displayName = "TestUser"
+            nickname = "TestUser"
         )
         val violations = validator.validate(request)
         assertThat(violations).extracting("message").containsAnyOf("이메일은 필수입니다", "글자에 공백이 있습니다.")
@@ -47,7 +47,7 @@ class CreateUserRequestTest {
         val request = CreateUserRequest(
             email = "invalid-email",
             password = "password123",
-            displayName = "TestUser"
+            nickname = "TestUser"
         )
         val violations = validator.validate(request)
         assertThat(violations).extracting("message").containsAnyOf("@를 포함해야합니다.")
@@ -59,7 +59,7 @@ class CreateUserRequestTest {
         val request = CreateUserRequest(
             email = "test@example.com",
             password = "",
-            displayName = "TestUser"
+            nickname = "TestUser"
         )
         val violations = validator.validate(request)
         assertThat(violations).extracting("message").containsAnyOf("비밀번호는 필수입니다", "비밀번호는 최소 3자 이상이어야 합니다", "글자에 공백이 있습니다.")
@@ -71,31 +71,31 @@ class CreateUserRequestTest {
         val request = CreateUserRequest(
             email = "test@example.com",
             password = "12",
-            displayName = "TestUser"
+            nickname = "TestUser"
         )
         val violations = validator.validate(request)
         assertThat(violations).extracting("message").containsAnyOf("비밀번호는 최소 3자 이상이어야 합니다")
     }
 
     @Test
-    @DisplayName("표시 이름 공백 실패")
-    fun `displayName blank fail`() {
+    @DisplayName("닉네임 공백 실패")
+    fun `nickname blank fail`() {
         val request = CreateUserRequest(
             email = "test@example.com",
             password = "password123",
-            displayName = ""
+            nickname = ""
         )
         val violations = validator.validate(request)
-        assertThat(violations).extracting("message").containsAnyOf("표시 이름은 필수입니다", "글자에 공백이 있습니다.")
+        assertThat(violations).extracting("message").containsAnyOf("닉네임은 필수입니다", "글자에 공백이 있습니다.")
     }
 
     @Test
-    @DisplayName("표시 이름 길이 실패")
-    fun `displayName size fail`() {
+    @DisplayName("닉네임 길이 실패")
+    fun `nickname size fail`() {
         val request = CreateUserRequest(
             email = "test@example.com",
             password = "password123",
-            displayName = "a".repeat(51)
+            nickname = "a".repeat(51)
         )
         val violations = validator.validate(request)
         assertThat(violations).extracting("message").containsAnyOf("표시 이름은 1-50자 사이여야 합니다")
@@ -107,7 +107,7 @@ class CreateUserRequestTest {
         val request = CreateUserRequest(
             email = "test @example.com",
             password = "password123",
-            displayName = "TestUser"
+            nickname = "TestUser"
         )
         val violations = validator.validate(request)
         assertThat(violations).extracting("message").containsAnyOf("글자에 공백이 있습니다.")
@@ -119,19 +119,19 @@ class CreateUserRequestTest {
         val request = CreateUserRequest(
             email = "test@example.com",
             password = "pass word",
-            displayName = "TestUser"
+            nickname = "TestUser"
         )
         val violations = validator.validate(request)
         assertThat(violations).extracting("message").containsAnyOf("글자에 공백이 있습니다.")
     }
 
     @Test
-    @DisplayName("표시 이름에 공백 포함 실패")
-    fun `displayName contains space fail`() {
+    @DisplayName("닉네임에 공백 포함 실패")
+    fun `nickname contains space fail`() {
         val request = CreateUserRequest(
             email = "test@example.com",
             password = "password123",
-            displayName = "Test User"
+            nickname = "Test User"
         )
         val violations = validator.validate(request)
         assertThat(violations).extracting("message").containsAnyOf("글자에 공백이 있습니다.")

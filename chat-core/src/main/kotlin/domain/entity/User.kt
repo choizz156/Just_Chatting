@@ -4,27 +4,30 @@ import org.bson.types.ObjectId
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Document(collection = "app_users")
 data class User(
     @Id
     val id: ObjectId? = null,
+    @Indexed(unique = true)
     val email: String,
-    val password: String,
+    @Indexed(unique = true)
     val nickname: String,
+    val password: String,
     val profileImageUrl: String? = null,
     val profileImage: ProfileImage? = null,
     val status: String? = null,
     val isActive: Boolean = true,
-    val lastSeenAt: LocalDateTime? = null,
+    val lastSeenAt: Instant? = null,
     val role: UserRole = UserRole.USER,
     val userStatus: UserStatus = UserStatus.ACTIVE,
     @CreatedDate
-    var createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: Instant = Instant.now(),
     @LastModifiedDate
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: Instant = Instant.now()
 )
 
 data class ProfileImage(
@@ -40,4 +43,3 @@ enum class UserStatus {
 enum class UserRole {
     USER, ADMIN, HOST, GUEST;
 }
-

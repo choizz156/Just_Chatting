@@ -45,7 +45,7 @@ class UserServiceV1(
     private fun resizeProfileImage(request: CreateUserContext): ProfileImage {
         val resizedProfile = resize(request)
         val profileImage = ProfileImage(
-            data = resizedProfile?.readBytes() ?: byteArrayOf(),
+            data = resizedProfile?.readBytes(),
             contentType = "image/jpeg",
             filename = request.profileImage?.originalFilename,
             storedFileName = request.profileImage?.originalFilename?.let {

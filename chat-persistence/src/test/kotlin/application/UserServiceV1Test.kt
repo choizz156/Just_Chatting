@@ -26,7 +26,7 @@ class UserServiceV1Test(
 
     @Test
     fun `create user`() {
-        val createUserContext = CreateUserContext("test@gmail.com", "dsfsdf123", "test11")
+        val createUserContext = CreateUserContext("test@gmail.com", "dsfsdf123", "test11", null)
 
         val createUser = userServiceV1.createUser(createUserContext)
 

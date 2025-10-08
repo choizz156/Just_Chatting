@@ -1,10 +1,10 @@
 package com.chat.core.dto
 
 import com.chat.core.domain.entity.ChatRoomType
-import com.chat.core.domain.entity.MessageType
 import com.chat.core.domain.entity.MemberRole
-import com.chat.core.application.dto.UserDto
-import java.time.LocalDateTime
+import com.chat.core.domain.entity.MessageSender
+import com.chat.core.domain.entity.MessageType
+import java.time.Instant
 
 data class ChatRoomContext(
     val name: String,
@@ -23,22 +23,21 @@ data class ChatRoomDto(
     val isActive: Boolean,
     val maxMembers: Int,
     val memberCount: Int,
-    val createdBy: UserDto,
-    val createdAt: LocalDateTime,
+    val createdBy: String,
+    val createdAt: Instant,
     val lastMessage: ChatMessageDto? = null
 )
 
 data class ChatMessageDto(
     val id: String,
     val chatRoomId: String,
-    val sender: UserDto,
+    val sender: MessageSender,
     val type: MessageType,
     val content: String?,
     val isEdited: Boolean,
     val isDeleted: Boolean,
-    val createdAt: LocalDateTime,
-    val editedAt: LocalDateTime?,
-    val sequenceNumber: Long,
+    val createdAt: Instant,
+    val editedAt: Instant?,
 )
 
 data class SendMessageRequest(
@@ -54,20 +53,20 @@ data class ChatRoomMemberDto(
     val role: MemberRole,
     val isActive: Boolean,
     val lastReadMessageId: Long?,
-    val joinedAt: LocalDateTime,
-    val leftAt: LocalDateTime?
+    val joinedAt: Instant,
+    val leftAt: Instant?
 )
 
 data class MessagePageRequest(
     val roomId: String,
     val size: Int = 20,
     val lastMessageId: String? = null,
-    val lastMessageTimestamp: LocalDateTime? = null
+    val lastMessageTimestamp: Instant? = null
 )
 
 data class MessagePageResponse(
     val messages: List<ChatMessageDto>,
     val hasNext: Boolean,
     val lastMessageId: String?,
-    val lastMessageTimestamp: LocalDateTime?
+    val lastMessageTimestamp: Instant?
 )

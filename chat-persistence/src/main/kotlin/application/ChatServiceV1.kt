@@ -8,6 +8,7 @@ import com.chat.core.dto.ChatRoomContext
 import com.chat.core.dto.ChatRoomDto
 import com.chat.core.dto.SendMessageRequest
 import com.chat.persistence.redis.RedisMessageBroker
+import com.chat.persistence.repository.ChatMessageRepository
 import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.chat.persistence.repository.ChatRoomRepository
 import com.chat.persistence.repository.UserRepository
@@ -26,10 +27,10 @@ class ChatServiceV1(
     private val chatRoomMemberRepository: ChatRoomMemberRepository,
     private val userRepository: UserRepository,
     private val redisMessageBroker: RedisMessageBroker,
-    private val messageService: MessageService,
     private val webSocketSessionManager: WebSocketSessionManager,
     private val dtoConverter: DtoConverter,
-    private val validator: Validator
+    private val validator: Validator,
+    private val chatMessageRepository: ChatMessageRepository
 ) : ChatService {
 
     private val logger = LoggerFactory.getLogger(ChatServiceV1::class.java)
@@ -82,12 +83,13 @@ class ChatServiceV1(
         ]
     )
     override fun leaveChatRoom(roomId: String, userId: String) {
-        val member = chatRoomMemberRepository.findByChatRoomIdAndUserIdAndIsActiveTrue(roomId, userId)
-            .orElseThrow { NoSuchElementException("Member not found") }
+        val member =
+            chatRoomMemberRepository.findByChatRoomIdAndUserIdAndIsActiveTrue(roomId, userId)
+                .orElseThrow { NoSuchElementException("Member not found") }
 
         val updatedMember = member.copy(
             isActive = false,
-            leftAt = java.time.LocalDateTime.now()
+            leftAt = java.time.Instant.now()
         )
         chatRoomMemberRepository.save(updatedMember)
 
@@ -103,29 +105,18 @@ class ChatServiceV1(
         validator.isNotChatRoomMember(request.chatRoomId, senderId)
 
         val sender = userRepository.findByIdOrThrow(ObjectId(senderId))
-        val savedMessage = saveMessage(request, sender)
+        val message = ChatMessage(
+            content = request.content,
+            sender = MessageSender(sender.id.toString(), sender.nickname, sender.profileImage?.data),
+            chatRoomId = request.chatRoomId,
+            type = request.type
+        )
+        val savedMessage = chatMessageRepository.save(message)
         val chatMessage = dtoConverter.messageToDto(savedMessage)
 
         publishMessage(request, chatMessage)
 
         return chatMessage
-    }
-
-    private fun saveMessage(
-        request: SendMessageRequest,
-        sender: User
-    ): ChatMessage {
-        val sequenceNumber = messageService.getNextSequence(request.chatRoomId)
-
-        val message = ChatMessage(
-            content = request.content,
-            sequenceNumber = sequenceNumber,
-            sender = sender,
-            chatRoomId = request.chatRoomId,
-            type = request.type
-        )
-
-        return messageService.saveMessage(message)
     }
 
     private fun publishMessage(
@@ -138,7 +129,6 @@ class ChatServiceV1(
             content = chatMessageDto.content,
             type = chatMessageDto.type,
             sender = chatMessageDto.sender,
-            sequenceNumber = chatMessageDto.sequenceNumber,
             chatRoomId = chatMessageDto.chatRoomId,
             isEdited = chatMessageDto.isEdited,
             isDeleted = chatMessageDto.isDeleted,

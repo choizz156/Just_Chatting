@@ -9,7 +9,6 @@ import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.chat.persistence.repository.ChatRoomRepository
 import com.chat.persistence.repository.UserRepository
 import com.chat.persistence.repository.findByIdOrThrow
-import de.flapdoodle.embed.mongo.client.AuthenticationSetup.role
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -27,7 +26,7 @@ import org.springframework.test.context.ContextConfiguration
 @EnableAutoConfiguration
 @EnableMongoRepositories(basePackages = ["com.chat.persistence.repository"])
 @ContextConfiguration(
-    classes = [ChatRoomRepository::class, ChatRoomMemberRepository::class]
+    classes = [ChatRoomRepository::class, ChatRoomMemberRepository::class, UserRepository::class]
 )
 @DataMongoTest
 class ChatRoomRepositoryTest {
@@ -52,7 +51,8 @@ class ChatRoomRepositoryTest {
             User(
                 email = "test@test.com",
                 password = "password",
-                nickname = "testUser"
+                nickname = "testUser",
+                profileImage = null
             )
         )
 
@@ -104,12 +104,13 @@ class ChatRoomRepositoryTest {
         val chatRoom3Dto = ChatRoom(
             name = "test3",
             type = ChatRoomType.GROUP,
+            createdBy = testUser
         )
         chatRoomRepository.save(chatRoom3Dto)
 
         //when
         val result =
-            chatRoomRepository.findByIsActiveTrueOrderByCreatedAtDesc()
+            chatRoomRepository.findByIsActiveTrueOrderByIdDesc()
 
         //then
         assertThat(result).hasSize(3)
@@ -124,12 +125,13 @@ class ChatRoomRepositoryTest {
         val chatRoom3Dto = ChatRoom(
             name = "테스트 채팅방",
             type = ChatRoomType.GROUP,
+            createdBy = testUser
         )
         chatRoomRepository.save(chatRoom3Dto)
 
         //when
         val result =
-            chatRoomRepository.findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc("테스트")
+            chatRoomRepository.findByNameContainingIgnoreCaseAndIsActiveTrueOrderByIdDesc("테스트")
 
         //then
         assertThat(result).hasSize(1)
@@ -144,6 +146,7 @@ class ChatRoomRepositoryTest {
         val chatRoom3Dto = ChatRoom(
             name = "테스트 채팅방",
             type = ChatRoomType.GROUP,
+            createdBy = testUser
         )
         val chatRoom = chatRoomRepository.save(chatRoom3Dto)
 

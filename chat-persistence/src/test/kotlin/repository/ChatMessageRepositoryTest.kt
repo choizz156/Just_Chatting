@@ -1,16 +1,10 @@
 package com.chat.persistence.test.repository
 
-import com.chat.core.domain.entity.ChatRoom
-import com.chat.core.domain.entity.ChatRoomMember
-import com.chat.core.domain.entity.ChatRoomType
-import com.chat.core.domain.entity.MemberRole
-import com.chat.core.domain.entity.User
-import com.chat.persistence.repository.ChatRoomMemberRepository
+import com.chat.core.domain.entity.*
+import com.chat.persistence.repository.ChatMessageRepository
 import com.chat.persistence.repository.ChatRoomRepository
 import com.chat.persistence.repository.UserRepository
-import com.chat.persistence.repository.findByIdOrThrow
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -26,141 +20,86 @@ import org.springframework.test.context.ContextConfiguration
 @EnableAutoConfiguration
 @EnableMongoRepositories(basePackages = ["com.chat.persistence.repository"])
 @ContextConfiguration(
-    classes = [ChatRoomRepository::class, ChatRoomMemberRepository::class]
+    classes = [ChatMessageRepository::class, ChatRoomRepository::class, UserRepository::class]
 )
 @DataMongoTest
 class ChatMessageRepositoryTest {
     @Autowired
-    private lateinit var chatRoomRepository: ChatRoomRepository
+    private lateinit var chatMessageRepository: ChatMessageRepository
 
     @Autowired
-    private lateinit var chatRoomMemberRepository: ChatRoomMemberRepository
+    private lateinit var chatRoomRepository: ChatRoomRepository
 
     @Autowired
     private lateinit var userRepository: UserRepository
 
     private lateinit var testUser: User
+    private lateinit var testChatRoom: ChatRoom
 
     @BeforeEach
     fun setUp() {
+        chatMessageRepository.deleteAll()
         chatRoomRepository.deleteAll()
-        chatRoomMemberRepository.deleteAll()
         userRepository.deleteAll()
 
         testUser = userRepository.save(
             User(
                 email = "test@test.com",
                 password = "password",
-                nickname = "testUser"
+                nickname = "testUser",
+                profileImage = null
             )
         )
 
-        val chatRoom1 = chatRoomRepository.save(ChatRoom(
+        testChatRoom = chatRoomRepository.save(ChatRoom(
             name = "test1",
             type = ChatRoomType.GROUP,
             createdBy = testUser
         ))
-
-        val chatRoom2 = chatRoomRepository.save(ChatRoom(
-            name = "test2",
-            type = ChatRoomType.GROUP,
-            createdBy = testUser
-        ))
-
-        val chatRoomMember1 = ChatRoomMember(
-            userId = testUser.id,
-            chatRoomId = chatRoom1.id,
-            role = MemberRole.MEMBER
-        )
-        val chatRoomMember2 = ChatRoomMember(
-            userId = testUser.id,
-            chatRoomId = chatRoom2.id,
-            role = MemberRole.MEMBER
-        )
-
-        chatRoomMemberRepository.save(chatRoomMember1)
-        chatRoomMemberRepository.save(chatRoomMember2)
     }
 
-    @DisplayName("유저가 속한 채팅방을 조회할 수 있다.")
+    @DisplayName("채팅 메시지를 저장하고 조회할 수 있다.")
     @Test
-    fun `find chatroom by user id`() {
-
-        //when
-        val result =
-            chatRoomRepository.findChatRoomsByUserId(testUser.id, PageRequest.of(0, 10))
-
-        //then
-        assertThat(result).hasSize(2)
-            .extracting("name")
-            .contains("test1", "test2")
-    }
-
-    @DisplayName("활성화된 채팅방을 조회할 수 있다.")
-    @Test
-    fun `find chatRoom`() {
-        //given
-        val chatRoom3Dto = ChatRoom(
-            name = "test3",
-            type = ChatRoomType.GROUP,
+    fun `save and find chat message`() {
+        // given
+        val chatMessage = ChatMessage(
+            chatRoomId = testChatRoom.id.toString(),
+            sender = MessageSender(testUser.id.toString(), testUser.nickname, null),
+            content = "hello"
         )
-        chatRoomRepository.save(chatRoom3Dto)
+        chatMessageRepository.save(chatMessage)
 
-        //when
-        val result =
-            chatRoomRepository.findByIsActiveTrueOrderByCreatedAtDesc()
+        // when
+        val messages = chatMessageRepository.findByChatRoomIdOrderByIdDesc(testChatRoom.id.toString(), PageRequest.of(0, 10))
 
-        //then
-        assertThat(result).hasSize(3)
-            .extracting("name")
-            .contains("test1", "test2", "test3")
+        // then
+        assertThat(messages.content).hasSize(1)
+        assertThat(messages.content[0].content).isEqualTo("hello")
     }
 
-    @DisplayName("채팅방을 검색할 수 있다.")
+    @DisplayName("채팅방의 마지막 메시지를 조회할 수 있다.")
     @Test
-    fun `search chatRoom`() {
-        //given
-        val chatRoom3Dto = ChatRoom(
-            name = "테스트 채팅방",
-            type = ChatRoomType.GROUP,
+    fun `find top message`() {
+        // given
+        val chatMessage1 = ChatMessage(
+            chatRoomId = testChatRoom.id.toString(),
+            sender = MessageSender(testUser.id.toString(), testUser.nickname, null),
+            content = "hello"
         )
-        chatRoomRepository.save(chatRoom3Dto)
+        chatMessageRepository.save(chatMessage1)
 
-        //when
-        val result =
-            chatRoomRepository.findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc("테스트")
-
-        //then
-        assertThat(result).hasSize(1)
-            .extracting("name")
-            .contains("테스트 채팅방")
-    }
-
-    @DisplayName("채팅방 id로 채팅방을 조회할 수 있다.")
-    @Test
-    fun `exist room`() {
-        //given
-        val chatRoom3Dto = ChatRoom(
-            name = "테스트 채팅방",
-            type = ChatRoomType.GROUP,
+        val chatMessage2 = ChatMessage(
+            chatRoomId = testChatRoom.id.toString(),
+            sender = MessageSender(testUser.id.toString(), testUser.nickname, null),
+            content = "world"
         )
-        val chatRoom = chatRoomRepository.save(chatRoom3Dto)
+        chatMessageRepository.save(chatMessage2)
 
-        //when
-        val result =
-            chatRoomRepository.findByIdOrThrow(chatRoom.id.toString())
+        // when
+        val topMessage = chatMessageRepository.findTopByChatRoomIdOrderByIdDesc(testChatRoom.id.toString())
 
-        //then
-        assertThat(result.id).isEqualTo(chatRoom.id)
-    }
-
-    @DisplayName("채팅방이 존재하지 않으면 예외를 던진다.")
-    @Test
-    fun `no exist room`() {
-        //given
-
-        //when then
-        assertThatThrownBy { chatRoomRepository.findByIdOrThrow("noExist") }
-            .isInstanceOf(IllegalArgumentException::class.java)
+        // then
+        assertThat(topMessage).isNotNull
+        assertThat(topMessage!!.content).isEqualTo("world")
     }
 }

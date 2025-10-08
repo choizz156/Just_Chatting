@@ -1,6 +1,6 @@
-package api.user
+package com.chat.api.user
 
-import api.TestApplication
+import com.chat.api.TestApplication
 import com.chat.core.application.UserService
 import com.chat.core.application.dto.UserDto
 import com.chat.core.domain.entity.UserRole
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
-import java.time.LocalDateTime
+import java.time.Instant
 import kotlin.test.Test
 
 
@@ -36,30 +36,31 @@ class UserControllerTest(
         val request = CreateUserRequest(
             email = "test@test.com",
             password = "password123",
-            displayName = "testUser"
+            nickname = "testUser"
         )
 
         val createdUser = UserDto(
             id = "1",
             email = request.email,
-            nickname = request.displayName,
-            profileImageUrl = null,
-            status = null,
+            nickname = request.nickname,
+            profileImage = null,
             isActive = true,
             roles = UserRole.USER,
-            lastSeenAt = LocalDateTime.now(),
-            createdAt = LocalDateTime.now()
+            lastSeenAt = Instant.now(),
+            createdAt = Instant.now()
         )
 
         given(userService.createUser(any())).willReturn(createdUser)
 
         // when & then
         mockMvc.post("/users") {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(request)
+            contentType = MediaType.MULTIPART_FORM_DATA
+            param("email", request.email)
+            param("password", request.password)
+            param("nickname", request.nickname)
         }.andExpect {
             status { isCreated() }
-            jsonPath("$.data") { value("1") }
+            jsonPath("$.data.id") { value("1") }
             jsonPath("$.time") { exists() }
         }.andDo { print() }
     }
@@ -70,13 +71,15 @@ class UserControllerTest(
         val invalidRequest = CreateUserRequest(
             email = "invalidEmail",
             password = "password123",
-            displayName = "testUser"
+            nickname = "testUser"
         )
 
         // when & then
         mockMvc.post("/users") {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(invalidRequest)
+            contentType = MediaType.MULTIPART_FORM_DATA
+            param("email", invalidRequest.email)
+            param("password", invalidRequest.password)
+            param("nickname", invalidRequest.nickname)
         }.andExpect {
             status { isBadRequest() }
         }.andDo { print() }
@@ -88,13 +91,15 @@ class UserControllerTest(
         val invalidRequest = CreateUserRequest(
             email = "test @test.com",
             password = "password123",
-            displayName = "testUser"
+            nickname = "testUser"
         )
 
         // when & then
         mockMvc.post("/users") {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(invalidRequest)
+            contentType = MediaType.MULTIPART_FORM_DATA
+            param("email", invalidRequest.email)
+            param("password", invalidRequest.password)
+            param("nickname", invalidRequest.nickname)
         }.andExpect {
             status { isBadRequest() }
         }.andDo { print() }

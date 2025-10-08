@@ -3,7 +3,7 @@ package com.chat.core.application.dto
 import com.chat.core.domain.entity.UserRole
 import jakarta.validation.constraints.NotBlank
 import org.springframework.web.multipart.MultipartFile
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class UserDto(
     val id: String,
@@ -12,8 +12,8 @@ data class UserDto(
     val profileImage: ByteArray?,
     val isActive: Boolean,
     val roles: UserRole,
-    val lastSeenAt: LocalDateTime?,
-    val createdAt: LocalDateTime
+    val lastSeenAt: Instant?,
+    val createdAt: Instant
 )
 
 data class CreateUserContext(

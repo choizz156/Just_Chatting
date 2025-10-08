@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Service
 @Transactional(readOnly = true)
@@ -35,7 +35,7 @@ class UserQueryServiceV1(
     override fun updateLastSeen(userId: String): UserDto {
         val user = userRepository.findByIdOrThrow(ObjectId(userId))
 
-        val now = LocalDateTime.now()
+        val now = Instant.now()
         // TODO: MongoDB에 맞게 마지막 접속 시간 업데이트 기능 구현
         // userRepository.updateLastSeenAt(userId, now)
 

@@ -1,6 +1,6 @@
 package com.chat.api.user
 
-import api.ApiResponseDto
+import com.chat.api.ApiResponseDto
 import com.chat.core.application.UserService
 import com.chat.core.application.dto.CreateUserContext
 import com.chat.core.application.dto.UserDto

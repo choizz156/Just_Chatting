@@ -5,7 +5,7 @@ import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 
 @Document(collection = "chat_room_members")
@@ -23,15 +23,15 @@ data class ChatRoomMember(
 
     val lastReadMessageId: Long? = null,
 
-    val joinedAt: LocalDateTime = LocalDateTime.now(),
+    val joinedAt: Instant = Instant.now(),
 
-    val leftAt: LocalDateTime? = null,
+    val leftAt: Instant? = null,
 
     @CreatedDate
-    var createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: Instant = Instant.now(),
 
     @LastModifiedDate
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: Instant = Instant.now()
 )
 
 enum class MemberRole {

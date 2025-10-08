@@ -1,10 +1,7 @@
 package com.chat.persistence.application
 
 import com.chat.core.application.dto.UserDto
-import com.chat.core.domain.entity.ChatMessage
-import com.chat.core.domain.entity.ChatRoom
-import com.chat.core.domain.entity.ChatRoomMember
-import com.chat.core.domain.entity.User
+import com.chat.core.domain.entity.*
 import com.chat.core.dto.ChatMessageDto
 import com.chat.core.dto.ChatRoomDto
 import com.chat.core.dto.ChatRoomMemberDto
@@ -24,7 +21,7 @@ class DtoConverter(
 ) {
     fun chatRoomToDto(chatRoom: ChatRoom): ChatRoomDto {
         val memberCount = chatRoomMemberRepository.countActiveMembersInRoom(chatRoom.id.toString()).toInt()
-        val lastMessage = chatMessageRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.id.toString())?.let { messageToDto(it) }
+        val lastMessage = chatMessageRepository.findTopByChatRoomIdOrderByIdDesc(chatRoom.id.toString())?.let { messageToDto(it) }
 
         return ChatRoomDto(
             id = chatRoom.id.toString(),
@@ -35,7 +32,7 @@ class DtoConverter(
             isActive = chatRoom.isActive,
             maxMembers = chatRoom.maxMembers,
             memberCount = memberCount,
-            createdBy = userToDto(chatRoom.createdBy!!),
+            createdBy = chatRoom.createdBy!!.id!!.toString(),
             createdAt = chatRoom.createdAt,
             lastMessage = lastMessage
         )
@@ -45,14 +42,13 @@ class DtoConverter(
         return ChatMessageDto(
             id = message.id.toString(),
             chatRoomId = message.chatRoomId,
-            sender = userToDto(message.sender),
+            sender = message.sender,
             type = message.type,
             content = message.content,
             isEdited = message.isEdited,
             isDeleted = message.isDeleted,
             createdAt = message.createdAt,
-            editedAt = message.editedAt,
-            sequenceNumber = message.sequenceNumber,
+            editedAt = message.editedAt
         )
     }
 
@@ -68,7 +64,6 @@ class DtoConverter(
             id = user.id.toString(),
             email = user.email,
             nickname = user.nickname,
-            status = user.status,
             isActive = user.isActive,
             roles = user.role,
             lastSeenAt = user.lastSeenAt,

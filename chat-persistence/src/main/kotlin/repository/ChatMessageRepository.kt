@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ChatMessageRepository : MongoRepository<ChatMessage, String> {
-    fun findByChatRoomIdOrderByCreatedAtDesc(chatRoomId: String, pageable: Pageable): Page<ChatMessage>
-    fun findTopByChatRoomIdOrderByCreatedAtDesc(chatRoomId: String): ChatMessage?
+    fun findByChatRoomIdOrderByIdDesc(chatRoomId: String, pageable: Pageable): Page<ChatMessage>
+    fun findTopByChatRoomIdOrderByIdDesc(chatRoomId: String): ChatMessage?
 }

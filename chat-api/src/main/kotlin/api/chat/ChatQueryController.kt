@@ -1,6 +1,6 @@
-package api.chat
+package com.chat.api.chat
 
-import api.ApiResponseDto
+import com.chat.api.ApiResponseDto
 import com.chat.core.application.ChatQueryService
 import com.chat.core.dto.ChatMessageDto
 import com.chat.core.dto.ChatRoomDto
@@ -8,7 +8,7 @@ import com.chat.core.dto.ChatRoomMemberDto
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.* 
 
 @RestController
 @RequestMapping("/chat")

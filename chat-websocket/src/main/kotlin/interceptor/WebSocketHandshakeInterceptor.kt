@@ -1,5 +1,8 @@
 package com.chat.websocket.interceptor
 
+import com.chat.persistence.redis.OnlineUserDto
+import com.chat.persistence.redis.OnlineUsers
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
@@ -9,7 +12,10 @@ import org.springframework.web.socket.server.HandshakeInterceptor
 
 
 @Component
-class WebSocketHandshakeInterceptor : HandshakeInterceptor {
+class WebSocketHandshakeInterceptor(
+    private val objectMapper: ObjectMapper,
+    private val onlineUsers: OnlineUsers
+) : HandshakeInterceptor {
 
     private val logger = LoggerFactory.getLogger(WebSocketHandshakeInterceptor::class.java)
 
@@ -48,6 +54,10 @@ class WebSocketHandshakeInterceptor : HandshakeInterceptor {
         wsHandler: WebSocketHandler,
         exception: Exception?,
     ) {
+
+        val onlineUser = objectMapper.readValue(request.body, OnlineUserDto::class.java)
+        onlineUsers.add(onlineUser)
+
         if (exception != null) {
             logger.error("WebSocket HandshakeInterceptor exception", exception)
         } else {
@@ -67,3 +77,4 @@ class WebSocketHandshakeInterceptor : HandshakeInterceptor {
     }
 
 }
+

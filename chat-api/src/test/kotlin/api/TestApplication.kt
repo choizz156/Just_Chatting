@@ -1,4 +1,4 @@
-package api
+package com.chat.api
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.test.context.ActiveProfiles

@@ -1,6 +1,6 @@
 package com.chat.api.chat
 
-import api.ApiResponseDto
+import com.chat.api.ApiResponseDto
 import com.chat.core.application.ChatService
 import com.chat.core.dto.ChatRoomContext
 import com.chat.core.dto.ChatRoomDto

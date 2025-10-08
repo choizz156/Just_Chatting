@@ -6,7 +6,7 @@ import com.chat.core.dto.ChatMessageDto
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class CreateChatRoomRequest(
     @field:NotBlank(message = "채팅방 이름은 필수입니다")
@@ -33,6 +33,6 @@ data class ChatRoomResponseDto(
     val maxMembers: Int,
     val memberCount: Int,
     val createdBy: UserDto,
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
     val lastMessage: ChatMessageDto?
 )
