@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.RedisMessageListenerContainer
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import java.util.concurrent.Executors
 
@@ -18,8 +19,8 @@ import java.util.concurrent.Executors
 @Configuration
 class RedisConfig {
 
-    @Bean("distributedObjectedMapper")
-    fun distributedObjectedMapper(): ObjectMapper {
+    @Bean
+    fun objectMapper(): ObjectMapper {
         return ObjectMapper().apply {
             registerModule(JavaTimeModule())
             registerModule(KotlinModule.Builder().build())
@@ -29,11 +30,11 @@ class RedisConfig {
     }
 
     @Bean
-    fun redisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, String> {
-        return RedisTemplate<String, String>().apply {
+    fun redisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, Any> {
+        return RedisTemplate<String, Any>().apply {
             setConnectionFactory(connectionFactory)
             keySerializer = StringRedisSerializer()
-            valueSerializer = StringRedisSerializer()
+            valueSerializer = GenericJackson2JsonRedisSerializer(objectMapper())
             hashKeySerializer = StringRedisSerializer()
             hashValueSerializer = StringRedisSerializer()
             afterPropertiesSet()
@@ -52,9 +53,8 @@ class RedisConfig {
                     isDaemon = true
                 }
             })
-            setErrorHandler { t ->
-                println("Redis Message Listener Error: $t")
-                t.printStackTrace()
+            setErrorHandler {
+                it.printStackTrace()
             }
         }
     }

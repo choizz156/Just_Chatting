@@ -1,4 +1,4 @@
-package com.chat.persistence.application
+package com.chat.websocket.application
 
 import com.chat.core.dto.ChatMessageDto
 import com.chat.persistence.redis.RedisMessageBroker
@@ -11,7 +11,7 @@ import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import java.util.concurrent.ConcurrentHashMap
 
-private val SERVER_ROOMS_KEY_PREFIX = "chat:server:rooms"
+private const val SERVER_ROOMS_KEY_PREFIX = "chat:server:rooms"
 
 @Component
 class WebSocketSessionManager(
@@ -21,6 +21,7 @@ class WebSocketSessionManager(
 ) {
     private val logger =
         LoggerFactory.getLogger(WebSocketSessionManager::class.java)
+
 
     private val userSession = ConcurrentHashMap<String, MutableSet<WebSocketSession>>()
     private val roomSessions = ConcurrentHashMap<String, MutableSet<WebSocketSession>>()
@@ -55,6 +56,7 @@ class WebSocketSessionManager(
         }
     }
 
+
     fun leaveRoom(userId: String, roomId: String) {
         val userSessions = userSession[userId] ?: return
         val sessionsInRoom = roomSessions[roomId] ?: return
@@ -86,6 +88,7 @@ class WebSocketSessionManager(
 
         val (serverId, serverRoomKey) = pair()
 
+        //특정 서버에 채팅룸 중복 확인 -> 특정 서버를 이미 구독하고 있는지
         val wasAlreadySubscribed =
             redisTemplate.opsForSet().isMember(serverRoomKey, roomId) == true
 
@@ -105,12 +108,12 @@ class WebSocketSessionManager(
     ) {
 
         val sessionsInRoom =
-            if (roomSessions[roomId].isNullOrEmpty()) return else roomSessions[roomId]
+            if (roomSessions[roomId].isNullOrEmpty()) return else roomSessions[roomId]!!
 
         val json = objectMapper.writeValueAsString(message)
         val closedSessions = mutableSetOf<WebSocketSession>()
 
-        sessionsInRoom!!.forEach { session ->
+        sessionsInRoom.forEach { session ->
             if (excludeUserId != null && session.attributes["userId"] == excludeUserId) {
                 return@forEach
             }
@@ -137,8 +140,8 @@ class WebSocketSessionManager(
 
         if (closedSessions.isNotEmpty()) {
             closedSessions.forEach { session ->
-                val userId = session.attributes["userId"]  as? String ?: return@forEach
-                    removeSession(userId, session)
+                val userId = session.attributes["userId"] as? String ?: return@forEach
+                removeSession(userId, session)
             }
         }
 

@@ -13,6 +13,12 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
+
+private const val CHANNEL_ROOM_PREFIX = "chat.room."
+private const val CHANNEL_ONLINE_USERS = "online.users"
 
 @Component
 class RedisMessageBroker(
@@ -20,6 +26,7 @@ class RedisMessageBroker(
     private val redisMessageListenerContainer: RedisMessageListenerContainer,
     private val objectMapper: ObjectMapper
 ) : MessageListener {
+
 
     private val logger = LoggerFactory.getLogger(RedisMessageBroker::class.java)
     private val serverId = System.getenv("HOSTNAME") ?: "server-${System.currentTimeMillis()}"
@@ -33,18 +40,19 @@ class RedisMessageBroker(
     fun initialize() {
         logger.info("Initializing RedisMessageListenerContainer")
 
-        Thread {
+        val scheduler: ScheduledExecutorService =
+            Executors.newSingleThreadScheduledExecutor { r ->
+                Thread(r, "redis-broker-clean")
+                    .apply { isDaemon = true }
+            }
+
+        scheduler.schedule({
             try {
-                Thread.sleep(30000)
                 cleanUpProcessedMessages()
             } catch (e: Exception) {
                 logger.error("Error in initializing RedisMessageListenerContainer", e)
             }
-        }.apply {
-            isDaemon = true
-            name = "redis-broker-cleanup"
-            start()
-        }
+        }, 10, TimeUnit.MINUTES)
     }
 
     @PreDestroy
@@ -61,7 +69,7 @@ class RedisMessageBroker(
 
     fun subscribeToRoom(roomId: String) {
         if (subscribeRooms.add(roomId)) {
-            val topic = ChannelTopic("chat.room.$roomId")
+            val topic = ChannelTopic(CHANNEL_ROOM_PREFIX + roomId)
             redisMessageListenerContainer.addMessageListener(this, topic)
             logger.info("Subscribed to $roomId")
         } else {
@@ -69,15 +77,23 @@ class RedisMessageBroker(
         }
     }
 
+
     fun unsubscribeFromRoom(roomId: String) {
         if (subscribeRooms.remove(roomId)) {
-            val topic = ChannelTopic("chat.room.$roomId")
+            val topic = ChannelTopic(CHANNEL_ROOM_PREFIX + roomId)
             redisMessageListenerContainer.removeMessageListener(this, topic)
             logger.info("Unsubscribed from $roomId")
             return
         }
         logger.error("Room $roomId does not exist")
     }
+
+    fun subscribeOnlineUsers() {
+        val topic = ChannelTopic("onlineUsers")
+        redisMessageListenerContainer.addMessageListener(this, topic)
+        logger.info("Subscribed to $topic")
+    }
+
 
     override fun onMessage(message: Message, pattern: ByteArray?) {
         try {
@@ -127,12 +143,17 @@ class RedisMessageBroker(
             )
 
             val json = objectMapper.writeValueAsString(message)
-            redisTemplate.convertAndSend("chat.room.$roomId", json)
+            redisTemplate.convertAndSend(CHANNEL_ROOM_PREFIX + roomId, json)
 
             logger.info("Broadcast to $roomId to $json")
         } catch (e: Exception) {
             logger.error("Error broadcast to $roomId", e)
         }
+    }
+
+    fun broadcastOnlineUsers(onlineUsers: List<OnlineUserDto>) {
+        redisTemplate.convertAndSend("CHANNEL_ONLINE_USERS", onlineUsers)
+        logger.info("Broadcast to online users")
     }
 
     private fun cleanUpProcessedMessages() {

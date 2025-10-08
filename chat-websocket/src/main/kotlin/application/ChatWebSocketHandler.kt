@@ -1,13 +1,11 @@
-package com.chat.websocket.handler
+package com.chat.websocket.application
 
 import com.chat.core.application.ChatQueryService
 import com.chat.core.application.ChatService
 import com.chat.core.domain.entity.MessageType
 import com.chat.core.dto.ErrorMessage
 import com.chat.core.dto.SendMessageRequest
-import com.chat.persistence.application.WebSocketSessionManager
-import com.chat.persistence.redis.OnlineUsers
-import com.chat.websocket.handler.ErrorCode.*
+import com.chat.websocket.application.ErrorCode.*
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -25,7 +23,6 @@ class ChatWebSocketHandler(
     private val chatService: ChatService,
     private val chatQueryService: ChatQueryService,
     private val objectMapper: ObjectMapper,
-    private val onlineUsers: OnlineUsers,
 ) : WebSocketHandler {
 
     private val logger = LoggerFactory.getLogger(ChatWebSocketHandler::class.java)
@@ -41,6 +38,7 @@ class ChatWebSocketHandler(
         } catch (e: Exception) {
             logger.error("Error while loading user chat rooms for user: $userId", e)
         }
+
     }
 
     override fun handleMessage(session: WebSocketSession, message: WebSocketMessage<*>) {
@@ -58,7 +56,6 @@ class ChatWebSocketHandler(
     override fun afterConnectionClosed(session: WebSocketSession, closeStatus: CloseStatus) {
         logger.info("WebSocket connection closed: ${closeStatus.code} - ${closeStatus.reason}")
         cleanupSession(session)
-        onlineUsers.remove(session.getUserId().toString())
         logger.info("logout userId = {}", session.getUserId().toString())
     }
 

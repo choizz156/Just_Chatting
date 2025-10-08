@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/users")
 class UserController(
-    private val userService: UserService
+    private val userService: UserService,
 ) {
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -26,9 +26,10 @@ class UserController(
     }
 
     @GetMapping
-    fun join(): ApiResponseDto<String> {
-        return ApiResponseDto("test")
+    fun getOnlineUsers(){
+
     }
+
 
     fun toContext(request: CreateUserRequest): CreateUserContext {
         return CreateUserContext(request.email, request.password, request.nickname, request.profileImage)

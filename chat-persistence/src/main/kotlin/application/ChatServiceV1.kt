@@ -8,11 +8,8 @@ import com.chat.core.dto.ChatRoomContext
 import com.chat.core.dto.ChatRoomDto
 import com.chat.core.dto.SendMessageRequest
 import com.chat.persistence.redis.RedisMessageBroker
-import com.chat.persistence.repository.ChatMessageRepository
-import com.chat.persistence.repository.ChatRoomMemberRepository
-import com.chat.persistence.repository.ChatRoomRepository
-import com.chat.persistence.repository.UserRepository
-import com.chat.persistence.repository.findByIdOrThrow
+import com.chat.persistence.repository.*
+import com.chat.websocket.application.WebSocketSessionManager
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CacheEvict
