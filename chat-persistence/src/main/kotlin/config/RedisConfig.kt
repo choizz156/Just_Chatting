@@ -36,7 +36,7 @@ class RedisConfig {
             keySerializer = StringRedisSerializer()
             valueSerializer = GenericJackson2JsonRedisSerializer(objectMapper())
             hashKeySerializer = StringRedisSerializer()
-            hashValueSerializer = StringRedisSerializer()
+            hashValueSerializer = GenericJackson2JsonRedisSerializer(objectMapper())
             afterPropertiesSet()
         }
     }

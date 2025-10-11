@@ -6,6 +6,7 @@ import com.chat.auth.handler.AuthDeniedHandler
 import com.chat.auth.handler.AuthEntryPointHandler
 import com.chat.auth.handler.AuthFailureHandler
 import com.chat.auth.handler.AuthSuccessHandler
+import com.chat.persistence.redis.OnlineUsers
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -33,6 +34,7 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 class SecurityConfig(
     private val objectMapper: ObjectMapper,
     private val userDetailsVerification: UserDetailsVerification,
+    private val onlineUsers: OnlineUsers
 ) {
 
     @Bean
@@ -86,7 +88,7 @@ class SecurityConfig(
         filter.setAuthenticationManager(authenticationManager())
         filter.setSessionAuthenticationStrategy(sessionAuthenticationStrategy())
         filter.setAuthenticationFailureHandler(AuthFailureHandler(objectMapper))
-        filter.setAuthenticationSuccessHandler(AuthSuccessHandler(objectMapper))
+        filter.setAuthenticationSuccessHandler(AuthSuccessHandler(objectMapper, onlineUsers))
         filter.setSecurityContextRepository(HttpSessionSecurityContextRepository())
 
         return filter

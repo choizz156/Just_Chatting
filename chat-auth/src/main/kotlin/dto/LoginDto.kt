@@ -9,6 +9,7 @@ data class UserResponseDto(
     val id: String,
     val email: String,
     val nickname: String,
-    val profileImage: ByteArray? = null,
+//    val profileImage: ByteArray? = null,
+    val profileImageUrl: String?,
 )
 

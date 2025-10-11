@@ -60,7 +60,7 @@ class UserControllerTest(
             param("nickname", request.nickname)
         }.andExpect {
             status { isCreated() }
-            jsonPath("$.data.id") { value("1") }
+            jsonPath("$.result.id") { value("1") }
             jsonPath("$.time") { exists() }
         }.andDo { print() }
     }

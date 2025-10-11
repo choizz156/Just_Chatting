@@ -1,4 +1,4 @@
-package com.chat.websocket.application
+package com.chat.persistence.application
 
 import com.chat.core.dto.ChatMessageDto
 import com.chat.persistence.redis.RedisMessageBroker
@@ -14,13 +14,13 @@ import java.util.concurrent.ConcurrentHashMap
 private const val SERVER_ROOMS_KEY_PREFIX = "chat:server:rooms"
 
 @Component
-class WebSocketSessionManager(
+class WebSocketChatSessionManager(
     private val redisTemplate: RedisTemplate<String, String>,
     private val objectMapper: ObjectMapper,
     private val redisMessageBroker: RedisMessageBroker,
 ) {
     private val logger =
-        LoggerFactory.getLogger(WebSocketSessionManager::class.java)
+        LoggerFactory.getLogger(WebSocketChatSessionManager::class.java)
 
 
     private val userSession = ConcurrentHashMap<String, MutableSet<WebSocketSession>>()

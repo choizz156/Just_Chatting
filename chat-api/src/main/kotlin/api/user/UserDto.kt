@@ -3,7 +3,6 @@ package com.chat.api.user
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
-import org.springframework.web.multipart.MultipartFile
 
 data class CreateUserRequest(
 
@@ -22,7 +21,8 @@ data class CreateUserRequest(
     @field:Size(min = 1, max = 50, message = "표시 이름은 1-50자 사이여야 합니다")
     val nickname: String,
 
-    val profileImage: MultipartFile? = null,
+//    val profileImage: MultipartFile? = null,
+    val profileImage: String? = null
 )
 
 data class LoginDto(

@@ -12,7 +12,7 @@ dependencyManagement {
 
 dependencies {
     implementation(project(":chat-core"))
-    implementation(project(":chat-websocket"))
+//    implementation(project(":chat-websocket"))
 
     //security password
     implementation("org.springframework.security:spring-security-crypto")

@@ -3,6 +3,8 @@ package com.chat.auth.handler
 import com.chat.auth.application.CustomUserPrincipal
 import com.chat.auth.dto.ApiResponseDto
 import com.chat.auth.dto.UserResponseDto
+import com.chat.core.application.dto.OnlineUserDto
+import com.chat.persistence.redis.OnlineUsers
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -11,7 +13,8 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 
 class AuthSuccessHandler(
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val onlineUsers: OnlineUsers
 ) : AuthenticationSuccessHandler {
 //    private val loginUsers: LoginUsers? = null
 
@@ -26,6 +29,13 @@ class AuthSuccessHandler(
         val principal = authentication.principal as CustomUserPrincipal
         val userInfo = principal.attribute
 
+        val onlineUser = OnlineUserDto(
+            userInfo.userId,
+            userInfo.nickname,
+            userInfo.profileImageUrl
+        )
+        onlineUsers.add(onlineUser)
+
         val userData =
             objectMapper.writeValueAsString(
                 ApiResponseDto(
@@ -33,7 +43,7 @@ class AuthSuccessHandler(
                         userInfo.userId,
                         userInfo.email,
                         userInfo.nickname,
-                        userInfo.profileImage
+                        userInfo.profileImageUrl
                     ),
                 )
             )

@@ -33,7 +33,7 @@ data class ChatMessage(
     val createdAt: Instant = Instant.now(),
 
     @LastModifiedDate
-    var updatedAt:Instant = Instant.now()
+    var updatedAt: Instant = Instant.now()
 )
 
 enum class MessageType {
@@ -44,5 +44,6 @@ enum class MessageType {
 data class MessageSender(
     val userId: String,
     val nickname: String,
-    val profileImage: ByteArray?
+//    val profileImage: ByteArray?
+    val profileImageUrl: String? = null,
 )

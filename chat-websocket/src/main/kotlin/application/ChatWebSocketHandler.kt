@@ -5,6 +5,7 @@ import com.chat.core.application.ChatService
 import com.chat.core.domain.entity.MessageType
 import com.chat.core.dto.ErrorMessage
 import com.chat.core.dto.SendMessageRequest
+import com.chat.persistence.application.WebSocketChatSessionManager
 import com.chat.websocket.application.ErrorCode.*
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -19,7 +20,7 @@ import java.io.EOFException
 
 @Component
 class ChatWebSocketHandler(
-    private val sessionManager: WebSocketSessionManager,
+    private val sessionManager: WebSocketChatSessionManager,
     private val chatService: ChatService,
     private val chatQueryService: ChatQueryService,
     private val objectMapper: ObjectMapper,

@@ -1,6 +1,8 @@
 package com.chat.persistence.redis
 
+import com.chat.core.application.dto.OnlineUserDto
 import com.chat.core.dto.ChatMessageDto
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
@@ -33,6 +35,7 @@ class RedisMessageBroker(
     private val processedMessages = ConcurrentHashMap<String, Long>()
     private val subscribeRooms = ConcurrentHashMap.newKeySet<String>()
     private var localMessageHandler: ((String, ChatMessageDto) -> Unit)? = null
+    private var onlineUserMessageHandler: ((List<OnlineUserDto>) -> Unit)? = null
 
     fun getServerId() = serverId
 
@@ -67,6 +70,52 @@ class RedisMessageBroker(
         this.localMessageHandler = handler
     }
 
+    fun setOnlineUserMessageHandler(handler: (List<OnlineUserDto>) -> Unit) {
+        this.onlineUserMessageHandler = handler
+    }
+
+    override fun onMessage(message: Message, pattern: ByteArray?) {
+        try {
+            val channel = String(pattern ?: message.channel)
+            val json = String(message.body)
+
+            if (channel == CHANNEL_ONLINE_USERS) {
+                val onlineUsers = objectMapper.readValue(json, object : TypeReference<List<OnlineUserDto>>() {})
+                onlineUserMessageHandler?.invoke(onlineUsers)
+            } else if (channel.startsWith(CHANNEL_ROOM_PREFIX)) {
+                val distributedMessage = objectMapper.readValue(
+                    json,
+                    DistributedMessage::class.java
+                )
+
+                if (distributedMessage.excludeSeverId == serverId) {
+                    logger.error("excludeSeverId to $serverId")
+                    return
+                }
+
+                if (processedMessages.containsKey(distributedMessage.id)) {
+                    logger.error("processedMessages $distributedMessage")
+                    return
+                }
+
+                localMessageHandler?.invoke(distributedMessage.roomId, distributedMessage.payload)
+
+                processedMessages[distributedMessage.id] = System.currentTimeMillis()
+
+                if (processedMessages.size > 10000) {
+                    val oldestEntries = processedMessages.entries.sortedBy { it.value }
+                        .take(processedMessages.size - 10000)
+
+                    oldestEntries.forEach { processedMessages.remove(it.key) }
+                }
+
+                logger.info("processedMessages $distributedMessage.id")
+            }
+        } catch (e: Exception) {
+            logger.error("Error in on message", e)
+        }
+    }
+
     fun subscribeToRoom(roomId: String) {
         if (subscribeRooms.add(roomId)) {
             val topic = ChannelTopic(CHANNEL_ROOM_PREFIX + roomId)
@@ -89,46 +138,9 @@ class RedisMessageBroker(
     }
 
     fun subscribeOnlineUsers() {
-        val topic = ChannelTopic("onlineUsers")
+        val topic = ChannelTopic(CHANNEL_ONLINE_USERS)
         redisMessageListenerContainer.addMessageListener(this, topic)
         logger.info("Subscribed to $topic")
-    }
-
-
-    override fun onMessage(message: Message, pattern: ByteArray?) {
-        try {
-            val json = String(message.body)
-            val distributedMessage = objectMapper.readValue(
-                json,
-                DistributedMessage::class.java
-            )
-
-            if (distributedMessage.excludeSeverId == serverId) {
-                logger.error("excludeSeverId to $serverId")
-                return
-            }
-
-            if (processedMessages.containsKey(distributedMessage.id)) {
-                logger.error("processedMessages $distributedMessage")
-                return
-            }
-
-            localMessageHandler?.invoke(distributedMessage.roomId, distributedMessage.payload)
-
-            processedMessages[distributedMessage.id] = System.currentTimeMillis()
-
-            if (processedMessages.size > 10000) {
-                val oldestEntries = processedMessages.entries.sortedBy { it.value }
-                    .take(processedMessages.size - 10000)
-
-                oldestEntries.forEach { processedMessages.remove(it.key) }
-            }
-
-            logger.info("processedMessages $distributedMessage.id")
-
-        } catch (e: Exception) {
-            logger.error("Error in on message", e)
-        }
     }
 
     fun broadcastToRoom(roomId: String, message: ChatMessageDto, excludeSeverId: String? = null) {
@@ -152,7 +164,9 @@ class RedisMessageBroker(
     }
 
     fun broadcastOnlineUsers(onlineUsers: List<OnlineUserDto>) {
-        redisTemplate.convertAndSend("CHANNEL_ONLINE_USERS", onlineUsers)
+        logger.info("Broadcasting onlineUsers = {}", onlineUsers)
+        val json = objectMapper.writeValueAsString(onlineUsers)
+        redisTemplate.convertAndSend(CHANNEL_ONLINE_USERS, json)
         logger.info("Broadcast to online users")
     }
 

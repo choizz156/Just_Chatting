@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.RedisMessageListenerContainer
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import redis.embedded.RedisServer
 import redis.embedded.core.RedisServerBuilder
@@ -31,11 +32,13 @@ class EmbeddedRedisConfig {
     }
 
     @Bean
-    fun redisTemplate(connectionFactory: LettuceConnectionFactory): RedisTemplate<String, String> {
-        val template = RedisTemplate<String, String>()
+    fun redisTemplate(connectionFactory: LettuceConnectionFactory): RedisTemplate<String, Any> {
+        val template = RedisTemplate<String, Any>()
         template.connectionFactory = connectionFactory
         template.keySerializer = StringRedisSerializer()
-        template.valueSerializer = StringRedisSerializer()
+        template.valueSerializer = GenericJackson2JsonRedisSerializer(objectMapper())
+        template.hashKeySerializer = StringRedisSerializer()
+        template.hashValueSerializer = GenericJackson2JsonRedisSerializer(objectMapper())
         return template
     }
 

@@ -18,7 +18,7 @@ data class User(
     val nickname: String,
     val password: String,
     val profileImageUrl: String? = null,
-    val profileImage: ProfileImage? = null,
+//    val profileImage: ProfileImage? = null,
     val status: String? = null,
     val isActive: Boolean = true,
     val lastSeenAt: Instant? = null,

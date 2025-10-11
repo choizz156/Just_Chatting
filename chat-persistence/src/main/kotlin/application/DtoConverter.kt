@@ -1,7 +1,10 @@
 package com.chat.persistence.application
 
 import com.chat.core.application.dto.UserDto
-import com.chat.core.domain.entity.*
+import com.chat.core.domain.entity.ChatMessage
+import com.chat.core.domain.entity.ChatRoom
+import com.chat.core.domain.entity.ChatRoomMember
+import com.chat.core.domain.entity.User
 import com.chat.core.dto.ChatMessageDto
 import com.chat.core.dto.ChatRoomDto
 import com.chat.core.dto.ChatRoomMemberDto
@@ -68,7 +71,7 @@ class DtoConverter(
             roles = user.role,
             lastSeenAt = user.lastSeenAt,
             createdAt = user.createdAt,
-            profileImage = user.profileImage?.data
+            profileImage = user.profileImageUrl
         )
     }
 

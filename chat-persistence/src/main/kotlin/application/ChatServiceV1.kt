@@ -9,7 +9,6 @@ import com.chat.core.dto.ChatRoomDto
 import com.chat.core.dto.SendMessageRequest
 import com.chat.persistence.redis.RedisMessageBroker
 import com.chat.persistence.repository.*
-import com.chat.websocket.application.WebSocketSessionManager
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CacheEvict
@@ -24,7 +23,7 @@ class ChatServiceV1(
     private val chatRoomMemberRepository: ChatRoomMemberRepository,
     private val userRepository: UserRepository,
     private val redisMessageBroker: RedisMessageBroker,
-    private val webSocketSessionManager: WebSocketSessionManager,
+    private val webSocketChatSessionManager: WebSocketChatSessionManager,
     private val dtoConverter: DtoConverter,
     private val validator: Validator,
     private val chatMessageRepository: ChatMessageRepository
@@ -42,8 +41,8 @@ class ChatServiceV1(
         val savedRoom = saveChatRoom(request, creator)
         saveChatRoomMember(savedRoom, creator)
 
-        if (webSocketSessionManager.isUserOnlineLocally(creator.id.toString())) {
-            webSocketSessionManager.joinRoom(creator.id.toString(), savedRoom.id.toString())
+        if (webSocketChatSessionManager.isUserOnlineLocally(creator.id.toString())) {
+            webSocketChatSessionManager.joinRoom(creator.id.toString(), savedRoom.id.toString())
         }
 
         return dtoConverter.chatRoomToDto(savedRoom)
@@ -68,8 +67,8 @@ class ChatServiceV1(
         )
         chatRoomMemberRepository.save(member)
 
-        if (webSocketSessionManager.isUserOnlineLocally(userId)) {
-            webSocketSessionManager.joinRoom(userId, roomId)
+        if (webSocketChatSessionManager.isUserOnlineLocally(userId)) {
+            webSocketChatSessionManager.joinRoom(userId, roomId)
         }
     }
 
@@ -90,8 +89,8 @@ class ChatServiceV1(
         )
         chatRoomMemberRepository.save(updatedMember)
 
-        if (webSocketSessionManager.isUserOnlineLocally(userId)) {
-            webSocketSessionManager.leaveRoom(userId, roomId)
+        if (webSocketChatSessionManager.isUserOnlineLocally(userId)) {
+            webSocketChatSessionManager.leaveRoom(userId, roomId)
         }
     }
 
@@ -104,7 +103,7 @@ class ChatServiceV1(
         val sender = userRepository.findByIdOrThrow(ObjectId(senderId))
         val message = ChatMessage(
             content = request.content,
-            sender = MessageSender(sender.id.toString(), sender.nickname, sender.profileImage?.data),
+            sender = MessageSender(sender.id.toString(), sender.nickname, sender.profileImageUrl),
             chatRoomId = request.chatRoomId,
             type = request.type
         )
@@ -132,7 +131,7 @@ class ChatServiceV1(
             createdAt = chatMessageDto.createdAt,
             editedAt = chatMessageDto.editedAt
         )
-        webSocketSessionManager.sendMessageToLocalRoom(request.chatRoomId, tempDto)
+        webSocketChatSessionManager.sendMessageToLocalRoom(request.chatRoomId, tempDto)
         broadcastMessage(request, tempDto)
     }
 

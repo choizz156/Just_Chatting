@@ -17,7 +17,7 @@ class UserController(
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    fun join(@Valid @ModelAttribute joinDto: CreateUserRequest): ApiResponseDto<UserDto> {
+    fun join(@Valid @RequestBody joinDto: CreateUserRequest): ApiResponseDto<UserDto> {
 
         val joinContext = toContext(joinDto)
         val userDto = userService.createUser(joinContext)

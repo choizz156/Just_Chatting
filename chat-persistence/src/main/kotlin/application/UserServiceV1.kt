@@ -4,16 +4,12 @@ import com.chat.core.application.UserService
 import com.chat.core.application.Validator
 import com.chat.core.application.dto.CreateUserContext
 import com.chat.core.application.dto.UserDto
-import com.chat.core.domain.entity.ProfileImage
 import com.chat.core.domain.entity.User
+import com.chat.persistence.redis.OnlineUsers
 import com.chat.persistence.repository.UserRepository
-import net.coobird.thumbnailator.Thumbnails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.util.*
 
 
 @Service
@@ -22,6 +18,7 @@ class UserServiceV1(
     private val userRepository: UserRepository,
     private val dtoConverter: DtoConverter,
     private val passwordEncoder: PasswordEncoder,
+    private val onlineUsers: OnlineUsers,
     private val validator: Validator
 ) : UserService {
 
@@ -29,44 +26,45 @@ class UserServiceV1(
         validator.checkEmail(request.email)
         validator.checkNickname(request.nickname)
 
-        val profileImage = resizeProfileImage(request)
+//        val profileImage = resizeProfileImage(request)
 
         val user = User(
             email = request.email,
             password = passwordEncoder.encode(request.password),
             nickname = request.nickname,
-            profileImage = profileImage,
+            profileImageUrl = request.profileImageUrl,
         )
 
         val savedUser = userRepository.save(user)
         return dtoConverter.userToDto(savedUser)
     }
 
-    private fun resizeProfileImage(request: CreateUserContext): ProfileImage {
-        val resizedProfile = resize(request)
-        val profileImage = ProfileImage(
-            data = resizedProfile?.readBytes(),
-            contentType = "image/jpeg",
-            filename = request.profileImage?.originalFilename,
-            storedFileName = request.profileImage?.originalFilename?.let {
-                it + UUID.randomUUID().toString()
-            }
-                ?: "${request.nickname}_profile.jpg"
-        )
-        return profileImage
-    }
 
-    private fun resize(request: CreateUserContext): ByteArrayInputStream? {
-        request.profileImage?.let {
-            val original = it.inputStream
-            val outputStream = ByteArrayOutputStream()
-            Thumbnails.of(original)
-                .outputFormat("jpeg")
-                .outputQuality(0.6)
-                .scale(0.6)
-                .toOutputStream(outputStream)
-            return ByteArrayInputStream(outputStream.toByteArray())
-        }
-        return null
-    }
+//    private fun resizeProfileImage(request: CreateUserContext): ProfileImage {
+//        val resizedProfile = resize(request)
+//        val profileImage = ProfileImage(
+//            data = resizedProfile?.readBytes(),
+//            contentType = "image/jpeg",
+//            filename = request.profileImageUrl?.originalFilename,
+//            storedFileName = request.profileImageUrl?.originalFilename?.let {
+//                it + UUID.randomUUID().toString()
+//            }
+//                ?: "${request.nickname}_profile.jpg"
+//        )
+//        return profileImage
+//    }
+//
+//    private fun resize(request: CreateUserContext): ByteArrayInputStream? {
+//        request.profileImageUrl?.let {
+//            val original = it.inputStream
+//            val outputStream = ByteArrayOutputStream()
+//            Thumbnails.of(original)
+//                .outputFormat("jpeg")
+//                .outputQuality(0.6)
+//                .scale(0.6)
+//                .toOutputStream(outputStream)
+//            return ByteArrayInputStream(outputStream.toByteArray())
+//        }
+//        return null
+//    }
 }
