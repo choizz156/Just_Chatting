@@ -2,7 +2,8 @@ package com.chat.api.chat
 
 import com.chat.api.ApiResponseDto
 import com.chat.core.application.ChatService
-import com.chat.core.dto.ChatRoomContext
+import com.chat.core.dto.ChatRoomContextDirect
+import com.chat.core.dto.ChatRoomContextGroup
 import com.chat.core.dto.ChatRoomDto
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
@@ -16,12 +17,23 @@ class ChatRoomController(
 ) {
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping
-    fun createChatRoom(
+    @PostMapping("/group")
+    fun createChatRoomGroup(
         @RequestParam createdBy: String,
-        @Valid @RequestBody request: CreateChatRoomRequest
+        @Valid @RequestBody request: CreateChatRoomGroupRequest
     ): ApiResponseDto<ChatRoomDto> {
-        val chatRoomContext = toChatRoomContext(request)
+        val chatRoomContext = toChatRoomGroupContext(request)
+        val chatRoom = chatServiceV1.createChatRoom(chatRoomContext, createdBy)
+        return ApiResponseDto.to(chatRoom)
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/direct")
+    fun createChatRoomDirect(
+        @RequestParam createdBy: String,
+        @Valid @RequestBody request: CreateChatRoomDirectRequest
+    ): ApiResponseDto<ChatRoomDto> {
+        val chatRoomContext = toChatRoomDirectContext(request)
         val chatRoom = chatServiceV1.createChatRoom(chatRoomContext, createdBy)
         return ApiResponseDto.to(chatRoom)
     }
@@ -48,13 +60,26 @@ class ChatRoomController(
 
 
 
-    fun toChatRoomContext(request: CreateChatRoomRequest): ChatRoomContext {
-        return ChatRoomContext(
-            request.name,
-            request.description,
-            request.type,
-            request.imageUrl,
-            request.maxMembers
+    private fun toChatRoomGroupContext(request: CreateChatRoomRequest): ChatRoomContextGroup {
+        val dto = request as CreateChatRoomGroupRequest
+        return ChatRoomContextGroup(
+            dto.name,
+            dto.description,
+            dto.type,
+            dto.imageUrl,
+            dto.maxMembers
+        )
+    }
+
+    private fun toChatRoomDirectContext(request: CreateChatRoomRequest): ChatRoomContextDirect {
+        val dto = request as CreateChatRoomDirectRequest
+        return ChatRoomContextDirect(
+            dto.name,
+            dto.description,
+            dto.type,
+            dto.imageUrl,
+            dto.clientId,
+            dto.maxMembers
         )
     }
 

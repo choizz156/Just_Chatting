@@ -6,13 +6,30 @@ import com.chat.core.domain.entity.MessageSender
 import com.chat.core.domain.entity.MessageType
 import java.time.Instant
 
-data class ChatRoomContext(
-    val name: String,
-    val description: String? = null,
-    val type: ChatRoomType = ChatRoomType.GROUP,
-    val imageUrl: String? = null,
-    val maxMembers: Int = 100,
-)
+abstract class ChatRoomContext {
+    abstract val name: String
+    abstract val description: String?
+    abstract val type: ChatRoomType
+    abstract val imageUrl: String?
+    abstract val maxMembers: Int
+}
+
+data class ChatRoomContextGroup(
+    override val name: String,
+    override val description: String? = null,
+    override val type: ChatRoomType = ChatRoomType.GROUP,
+    override val imageUrl: String? = null,
+    override val maxMembers: Int = 100
+) : ChatRoomContext()
+
+data class ChatRoomContextDirect(
+    override val name: String,
+    override val description: String? = null,
+    override val type: ChatRoomType = ChatRoomType.DIRECT,
+    override val imageUrl: String? = null,
+    val clientId: String,
+    override val maxMembers: Int = 2,
+) : ChatRoomContext()
 
 data class ChatRoomDto(
     val id: String,

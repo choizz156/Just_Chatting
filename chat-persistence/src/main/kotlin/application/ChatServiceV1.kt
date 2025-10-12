@@ -3,12 +3,10 @@ package com.chat.persistence.application
 import com.chat.core.application.ChatService
 import com.chat.core.application.Validator
 import com.chat.core.domain.entity.*
-import com.chat.core.dto.ChatMessageDto
-import com.chat.core.dto.ChatRoomContext
-import com.chat.core.dto.ChatRoomDto
-import com.chat.core.dto.SendMessageRequest
+import com.chat.core.dto.*
 import com.chat.persistence.redis.RedisMessageBroker
 import com.chat.persistence.repository.*
+import lombok.extern.slf4j.Slf4j
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CacheEvict
@@ -16,6 +14,7 @@ import org.springframework.cache.annotation.Caching
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+@Slf4j
 @Service
 @Transactional
 class ChatServiceV1(
@@ -165,6 +164,14 @@ class ChatServiceV1(
     private fun saveChatRoom(
         request: ChatRoomContext,
         creator: User
+    ): ChatRoom = when (request) {
+        is ChatRoomContextDirect -> createDirectRoom(request, creator)
+        else -> createGroupRoom(request, creator)
+    }
+
+    private fun createGroupRoom(
+        request: ChatRoomContext,
+        creator: User
     ): ChatRoom {
         val chatRoom = ChatRoom(
             name = request.name,
@@ -175,6 +182,23 @@ class ChatServiceV1(
             createdBy = creator
         )
 
+        return chatRoomRepository.save(chatRoom)
+    }
+
+    private fun createDirectRoom(
+        request: ChatRoomContextDirect,
+        creator: User
+    ): ChatRoom {
+        chatRoomRepository.checkDuplicateRoom(creator, request.clientId)
+        val chatRoom = ChatRoom(
+            name = request.name,
+            description = request.description,
+            type = request.type,
+            imageUrl = request.imageUrl,
+            maxMembers = request.maxMembers,
+            clientId = request.clientId,
+            createdBy = creator
+        )
         return chatRoomRepository.save(chatRoom)
     }
 }
