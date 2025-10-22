@@ -47,7 +47,7 @@ class ChatMessageRepositoryTest {
                 email = "test@test.com",
                 password = "password",
                 nickname = "testUser",
-                profileImage = null
+                profileImageUrl = null
             )
         )
 

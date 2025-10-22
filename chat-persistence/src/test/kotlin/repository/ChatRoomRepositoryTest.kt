@@ -1,10 +1,6 @@
 package com.chat.persistence.test.repository
 
-import com.chat.core.domain.entity.ChatRoom
-import com.chat.core.domain.entity.ChatRoomMember
-import com.chat.core.domain.entity.ChatRoomType
-import com.chat.core.domain.entity.MemberRole
-import com.chat.core.domain.entity.User
+import com.chat.core.domain.entity.*
 import com.chat.persistence.repository.ChatRoomMemberRepository
 import com.chat.persistence.repository.ChatRoomRepository
 import com.chat.persistence.repository.UserRepository
@@ -52,25 +48,29 @@ class ChatRoomRepositoryTest {
                 email = "test@test.com",
                 password = "password",
                 nickname = "testUser",
-                profileImage = null
+                profileImageUrl = null
             )
         )
 
-        val chatRoom1 = chatRoomRepository.save(ChatRoom(
-            name = "test1",
-            type = ChatRoomType.GROUP,
-            createdBy = testUser
-        ))
+        val chatRoom1 = chatRoomRepository.save(
+            ChatRoom(
+                name = "test1",
+                type = ChatRoomType.GROUP,
+                createdBy = testUser
+            )
+        )
 
-        val chatRoom2 = chatRoomRepository.save(ChatRoom(
-            name = "test2",
-            type = ChatRoomType.GROUP,
-            createdBy = testUser
-        ))
+        val chatRoom2 = chatRoomRepository.save(
+            ChatRoom(
+                name = "test2",
+                type = ChatRoomType.GROUP,
+                createdBy = testUser
+            )
+        )
 
         val chatRoomMember1 = ChatRoomMember(
             userId = testUser.id,
-            chatRoomId= chatRoom1.id,
+            chatRoomId = chatRoom1.id,
             role = MemberRole.MEMBER
         )
         val chatRoomMember2 = ChatRoomMember(
@@ -89,7 +89,11 @@ class ChatRoomRepositoryTest {
 
         //when
         val result =
-            chatRoomRepository.findChatRoomsByUserIdAndType(testUser.id, PageRequest.of(0, 10))
+            chatRoomRepository.findChatRoomsByUserIdAndType(
+                testUser.id,
+                ChatRoomType.GROUP,
+                PageRequest.of(0, 10),
+            )
 
         //then
         assertThat(result).hasSize(2)
