@@ -70,7 +70,7 @@ class ChatWebSocketHandler(
     private fun loadUserChatRooms(userId: String) {
         try {
             val chatRooms =
-                chatQueryService.getChatRooms(userId, PageRequest.of(0, 100))
+                chatQueryService.findGroupChatRooms(userId, PageRequest.of(0, 100))
             chatRooms.content.forEach { room ->
                 sessionManager.joinRoom(userId, room.id)
             }

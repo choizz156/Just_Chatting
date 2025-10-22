@@ -8,6 +8,7 @@ import com.chat.auth.handler.AuthFailureHandler
 import com.chat.auth.handler.AuthSuccessHandler
 import com.chat.persistence.redis.OnlineUsers
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -17,16 +18,17 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
-import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.session.SessionRegistry
-import org.springframework.security.core.session.SessionRegistryImpl
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
+import org.springframework.session.FindByIndexNameSessionRepository
+import org.springframework.session.security.SpringSessionBackedSessionRegistry
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.authentication.session.*
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
+import org.springframework.security.web.session.HttpSessionEventPublisher
+import kotlin.jvm.java
 
 
 @EnableWebSecurity
@@ -34,7 +36,8 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 class SecurityConfig(
     private val objectMapper: ObjectMapper,
     private val userDetailsVerification: UserDetailsVerification,
-    private val onlineUsers: OnlineUsers
+    private val onlineUsers: OnlineUsers,
+    private val sessionRepository: FindByIndexNameSessionRepository<*>
 ) {
 
     @Bean
@@ -45,15 +48,15 @@ class SecurityConfig(
     }
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun securityFilterChain(
+        http: HttpSecurity,
+    ): SecurityFilterChain {
         return http.csrf { it.disable() }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
             .cors { cors -> cors.configurationSource(CorsConfig().corsFilter()) }
             .sessionManagement {
                 it.sessionAuthenticationStrategy(sessionAuthenticationStrategy())
-                    .sessionFixation()
-                    .changeSessionId()
                     .maximumSessions(1)
                     .maxSessionsPreventsLogin(false)
                     .expiredUrl("http://localhost:5173/")
@@ -113,7 +116,7 @@ class SecurityConfig(
 
     @Bean
     fun sessionRegistry(): SessionRegistry {
-        return SessionRegistryImpl()
+        return SpringSessionBackedSessionRegistry(sessionRepository)
     }
 
     @Bean
@@ -122,6 +125,11 @@ class SecurityConfig(
         provider.setUserDetailsService(userDetailsVerification)
         provider.setPasswordEncoder(passwordEncoder())
         return ProviderManager(provider);
+    }
+
+    @Bean
+    fun httpSessionEventPublisher(): ServletListenerRegistrationBean<HttpSessionEventPublisher?> {
+        return ServletListenerRegistrationBean<HttpSessionEventPublisher?>(HttpSessionEventPublisher())
     }
 }
 

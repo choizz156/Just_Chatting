@@ -1,5 +1,6 @@
 spring:
 
+
   servlet:
     multipart:
       enabled: true
@@ -21,7 +22,12 @@ spring:
 
   session:
     redis:
-      repository-type: default
+      flush-mode: on-save
+      namespace: spring:session
+      ## 이 설정을 해야 FindByIndexNameSessionRepository를 만든다.
+      repository-type: indexed
+
+
 
 
 server:

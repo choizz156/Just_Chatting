@@ -3,7 +3,6 @@ package com.chat.persistence.config
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -14,17 +13,50 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.RedisMessageListenerContainer
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisIndexedHttpSession
 import redis.embedded.RedisServer
 import redis.embedded.core.RedisServerBuilder
 import java.io.IOException
 import java.net.ServerSocket
 
 @Profile("test || local")
+@EnableRedisIndexedHttpSession
 @Configuration
 class EmbeddedRedisConfig {
     private val host = "localhost"
-    private var port = 0
-    private var redisServer: RedisServer? = null
+    private var port: Int
+    private var redisServer: RedisServer?
+
+    init {
+        try {
+            val defaultRedisPort = 6380
+            port = if (isPortInUse(defaultRedisPort)) findAvailablePort() else defaultRedisPort
+
+            try {
+                redisServer = RedisServerBuilder()
+                    .port(port)
+                    .setting("daemonize no")
+                    .setting("appendonly no")
+                    .setting("save \" \"")
+                    .setting("dbfilename \" \"")
+                    .setting("stop-writes-on-bgsave-error no")
+                    .build()
+
+                redisServer?.start()
+                logger.info("Embedded Redis started on port {}", port)
+            } catch (e: Exception) {
+                logger.error(
+                    "Failed to start embedded Redis server. Tests will continue without Redis. Error: {}",
+                    e.message
+                )
+                redisServer = null
+            }
+        } catch (e: Exception) {
+            logger.error("Error during Redis server initialization: {}", e.message)
+            redisServer = null
+            port = -1
+        }
+    }
 
     @Bean
     fun redisConnectionFactory(): LettuceConnectionFactory {
@@ -55,35 +87,6 @@ class EmbeddedRedisConfig {
         mapper.registerModule(JavaTimeModule())
         mapper.registerModule(KotlinModule.Builder().build())
         return mapper
-    }
-
-    @PostConstruct
-    fun redisServer() {
-        try {
-            val defaultRedisPort = 6380
-            port = if (isPortInUse(defaultRedisPort)) findAvailablePort() else defaultRedisPort
-
-            try {
-                redisServer = RedisServerBuilder()
-                    .port(port)
-                    .setting("daemonize no")
-                    .setting("appendonly no")
-                    .setting("save \" \"")
-                    .setting("dbfilename \" \"")
-                    .setting("stop-writes-on-bgsave-error no")
-                    .build()
-
-                redisServer?.start()
-                logger.info("Embedded Redis started on port {}", port)
-            } catch (e: Exception) {
-                logger.error(
-                    "Failed to start embedded Redis server. Tests will continue without Redis. Error: {}",
-                    e.message
-                )
-            }
-        } catch (e: Exception) {
-            logger.error("Error during Redis server initialization: {}", e.message)
-        }
     }
 
     @PreDestroy

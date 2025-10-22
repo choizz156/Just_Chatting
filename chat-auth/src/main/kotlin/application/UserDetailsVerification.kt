@@ -6,6 +6,7 @@ import com.chat.persistence.repository.findByUsernameOrThrow
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
+import java.io.Serializable
 
 @Component
 class UserDetailsVerification(
@@ -39,4 +40,4 @@ data class UserAttribute(
     val role: UserRole,
 //    val profileImage: ByteArray? = null
     val profileImageUrl: String?
-)
+): Serializable

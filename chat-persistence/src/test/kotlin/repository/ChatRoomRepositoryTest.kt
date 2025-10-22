@@ -89,7 +89,7 @@ class ChatRoomRepositoryTest {
 
         //when
         val result =
-            chatRoomRepository.findChatRoomsByUserId(testUser.id, PageRequest.of(0, 10))
+            chatRoomRepository.findChatRoomsByUserIdAndType(testUser.id, PageRequest.of(0, 10))
 
         //then
         assertThat(result).hasSize(2)

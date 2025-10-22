@@ -75,7 +75,9 @@ class OnlineUserWebSocketHandler(
     fun broadcast(message: String) {
         sessions.forEach { session ->
             if (session.isOpen) {
-                session.sendMessage(TextMessage(message))
+                synchronized(session) {
+                    session.sendMessage(TextMessage(message))
+                }
             }
         }
     }
