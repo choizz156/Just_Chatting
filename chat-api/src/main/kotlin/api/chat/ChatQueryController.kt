@@ -11,42 +11,51 @@ import org.springframework.data.web.PageableDefault
 import org.springframework.web.bind.annotation.* 
 
 @RestController
-@RequestMapping("/chat")
+@RequestMapping("/rooms")
 class ChatQueryController(
     private val chatQueryService: ChatQueryService
 ) {
 
-    @GetMapping("/rooms")
-    fun getChatRooms(
-        userId: String,
+    @GetMapping("/group")
+    fun getGroupChatRooms(
+        @RequestParam userId: String,
         @PageableDefault(size = 20) pageable: Pageable
     ): ApiResponseDto<Page<ChatRoomDto>> {
-        val chatRooms = chatQueryService.getChatRooms(userId, pageable)
+        val chatRooms = chatQueryService.findGroupChatRooms(userId, pageable)
         return ApiResponseDto.to(chatRooms)
     }
 
-    @GetMapping("/rooms/search")
+    @GetMapping("/direct")
+    fun getDirectChatRooms(
+        @RequestParam userId: String,
+        @PageableDefault(size = 20) pageable: Pageable
+    ): ApiResponseDto<Page<ChatRoomDto>> {
+        val chatRooms = chatQueryService.findDirectChatRooms(userId, pageable)
+        return ApiResponseDto.to(chatRooms)
+    }
+
+    @GetMapping("/search")
     fun searchChatRooms(@RequestParam query: String): ApiResponseDto<List<ChatRoomDto>> {
         val chatRooms = chatQueryService.searchChatRooms(query)
         return ApiResponseDto.to(chatRooms)
     }
 
-    @GetMapping("/rooms/{roomId}")
+    @GetMapping("/{roomId}")
     fun getChatRoom(@PathVariable roomId: String): ApiResponseDto<ChatRoomDto> {
         val chatRoom = chatQueryService.getChatRoom(roomId)
         return ApiResponseDto.to(chatRoom)
     }
 
-    @GetMapping("/rooms/{roomId}/members")
+    @GetMapping("/{roomId}/members")
     fun getChatRoomMembers(@PathVariable roomId: String): ApiResponseDto<List<ChatRoomMemberDto>> {
         val members = chatQueryService.getChatRoomMembers(roomId)
         return ApiResponseDto.to(members)
     }
 
-    @GetMapping("/rooms/{roomId}/messages")
+    @GetMapping("/{roomId}/messages")
     fun getMessages(
         @PathVariable roomId: String,
-        userId: String,
+        @RequestParam userId: String,
         @PageableDefault(size = 50) pageable: Pageable
     ): ApiResponseDto<Page<ChatMessageDto>> {
         val messages = chatQueryService.getMessages(roomId, userId, pageable)

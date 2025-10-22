@@ -1,8 +1,12 @@
 package com.chat.persistence.application
 
 import com.chat.core.application.ChatQueryService
+import com.chat.core.domain.entity.ChatRoomType
 import com.chat.core.dto.*
-import com.chat.persistence.repository.*
+import com.chat.persistence.repository.ChatMessageRepository
+import com.chat.persistence.repository.ChatRoomMemberRepository
+import com.chat.persistence.repository.ChatRoomRepository
+import com.chat.persistence.repository.findByIdOrThrow
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -19,9 +23,26 @@ class ChatQueryServiceV1(
     private val dtoConverter: DtoConverter
 ) : ChatQueryService {
 
-    override fun getChatRooms(userId: String, pageable: Pageable): Page<ChatRoomDto> {
-        val chatRooms = chatRoomRepository.findChatRoomsByUserId(ObjectId(userId), pageable)
-        val chatRoomList = chatRooms.map{ dtoConverter.chatRoomToDto(it) }
+    override fun findGroupChatRooms(userId: String, pageable: Pageable): Page<ChatRoomDto> {
+        val chatRooms = chatRoomRepository.findChatRoomsByUserIdAndType(
+            ObjectId(userId),
+            pageable,
+            ChatRoomType.GROUP
+        )
+        val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
+        return PageImpl(chatRoomList)
+    }
+
+    override fun findDirectChatRooms(
+        userId: String,
+        pageable: Pageable
+    ): Page<ChatRoomDto> {
+        val chatRooms = chatRoomRepository.findChatRoomsByUserIdAndType(
+            ObjectId(userId),
+            pageable,
+            ChatRoomType.DIRECT
+        )
+        val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
         return PageImpl(chatRoomList)
     }
 

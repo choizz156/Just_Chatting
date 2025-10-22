@@ -19,13 +19,13 @@ interface ChatRoomRepository : MongoRepository<ChatRoom, String> {
             "{ \$match: { 'isActive': true }}",
             "{ \$lookup: { from: 'chat_room_members', localField: '_id', foreignField: 'chatRoomId', as: 'chatRoomInfo'}}",
             "{ \$unwind: '\$chatRoomInfo'}",
-            "{ \$match: { 'chatRoomInfo.userId': ?0, 'chatRoomInfo.isActive': true }}",
+            "{ \$match: { 'chatRoomInfo.userId': ?0, 'chatRoomInfo.isActive': true, 'chatRoomInfo.type': ?2 }}",
             "{ \$sort: { 'updatedAt': -1 }}",
             "{ \$group: { _id: '\$_id', doc: { '\$first': '$\$ROOT' } } }",
             "{ \$replaceRoot: { newRoot: '\$doc' } }"
         ]
     )
-    fun findChatRoomsByUserId(userId: ObjectId?, pageable: Pageable): List<ChatRoom>
+    fun findChatRoomsByUserIdAndType(userId: ObjectId?, pageable: Pageable, type: ChatRoomType): List<ChatRoom>
     fun findByIsActiveTrueOrderByIdDesc(): List<ChatRoom>
     fun findByNameContainingIgnoreCaseAndIsActiveTrueOrderByIdDesc(name: String): List<ChatRoom>
     fun findByTypeContainingIgnoreCaseAndCreatedByAndClientId(

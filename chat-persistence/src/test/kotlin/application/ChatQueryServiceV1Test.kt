@@ -95,9 +95,9 @@ class ChatQueryServiceV1Test(
 
         //when
         val result1: Page<ChatRoomDto> =
-            chatQueryService.getChatRooms(user1.id.toString(), PageRequest.of(0, 10))
+            chatQueryService.findGroupChatRooms(user1.id.toString(), PageRequest.of(0, 10))
         val result2: Page<ChatRoomDto> =
-            chatQueryService.getChatRooms(user2.id.toString(), PageRequest.of(0, 10))
+            chatQueryService.findGroupChatRooms(user2.id.toString(), PageRequest.of(0, 10))
 
         //then
         assertThat(result1.content).hasSize(2)
