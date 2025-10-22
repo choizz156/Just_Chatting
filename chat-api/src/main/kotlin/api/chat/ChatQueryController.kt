@@ -8,13 +8,21 @@ import com.chat.core.dto.ChatRoomMemberDto
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
-import org.springframework.web.bind.annotation.* 
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/rooms")
 class ChatQueryController(
     private val chatQueryService: ChatQueryService
 ) {
+
+    @GetMapping("/group/all")
+    fun getRandomGroupChatRooms(
+        @PageableDefault(size = 20) pageable: Pageable
+    ): ApiResponseDto<Page<ChatRoomDto>> {
+        val chatRooms = chatQueryService.findAllGroupChatRooms(pageable)
+        return ApiResponseDto.to(chatRooms)
+    }
 
     @GetMapping("/group")
     fun getGroupChatRooms(

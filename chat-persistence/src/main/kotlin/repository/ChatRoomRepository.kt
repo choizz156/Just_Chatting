@@ -25,7 +25,12 @@ interface ChatRoomRepository : MongoRepository<ChatRoom, String> {
             "{ \$replaceRoot: { newRoot: '\$doc' } }"
         ]
     )
-    fun findChatRoomsByUserIdAndType(userId: ObjectId?, pageable: Pageable, type: ChatRoomType): List<ChatRoom>
+    fun findChatRoomsByUserIdAndType(
+        userId: ObjectId?,
+        pageable: Pageable,
+        type: ChatRoomType
+    ): List<ChatRoom>
+
     fun findByIsActiveTrueOrderByIdDesc(): List<ChatRoom>
     fun findByNameContainingIgnoreCaseAndIsActiveTrueOrderByIdDesc(name: String): List<ChatRoom>
     fun findByTypeContainingIgnoreCaseAndCreatedByAndClientId(
@@ -34,13 +39,19 @@ interface ChatRoomRepository : MongoRepository<ChatRoom, String> {
         clientId: String
     ): Optional<ChatRoom>
 
+    fun findAllByType(type: ChatRoomType, pageable: Pageable): List<ChatRoom>
+
 }
 
 fun ChatRoomRepository.findByIdOrThrow(roomId: String): ChatRoom =
     findById(roomId).orElseThrow { IllegalArgumentException("채팅방을 찾을 수 없습니다.: $roomId") }
 
 fun ChatRoomRepository.checkDuplicateRoom(createBy: User, clientId: String) {
-    findByTypeContainingIgnoreCaseAndCreatedByAndClientId(ChatRoomType.DIRECT, createBy, clientId).ifPresent {
+    findByTypeContainingIgnoreCaseAndCreatedByAndClientId(
+        ChatRoomType.DIRECT,
+        createBy,
+        clientId
+    ).ifPresent {
         throw IllegalAccessException("이미 존재하는 채팅방입니다. ")
     }
 }

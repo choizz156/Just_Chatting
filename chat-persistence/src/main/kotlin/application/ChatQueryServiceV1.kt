@@ -23,6 +23,12 @@ class ChatQueryServiceV1(
     private val dtoConverter: DtoConverter
 ) : ChatQueryService {
 
+    override fun findAllGroupChatRooms(pageable: Pageable): Page<ChatRoomDto> {
+        val chatRooms = chatRoomRepository.findAllByType(ChatRoomType.GROUP, pageable)
+        val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
+        return PageImpl(chatRoomList)
+    }
+
     override fun findGroupChatRooms(userId: String, pageable: Pageable): Page<ChatRoomDto> {
         val chatRooms = chatRoomRepository.findChatRoomsByUserIdAndType(
             ObjectId(userId),
