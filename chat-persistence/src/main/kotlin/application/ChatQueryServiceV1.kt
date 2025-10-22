@@ -32,8 +32,8 @@ class ChatQueryServiceV1(
     override fun findGroupChatRooms(userId: String, pageable: Pageable): Page<ChatRoomDto> {
         val chatRooms = chatRoomRepository.findChatRoomsByUserIdAndType(
             ObjectId(userId),
+            ChatRoomType.GROUP,
             pageable,
-            ChatRoomType.GROUP
         )
         val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
         return PageImpl(chatRoomList)
@@ -45,8 +45,8 @@ class ChatQueryServiceV1(
     ): Page<ChatRoomDto> {
         val chatRooms = chatRoomRepository.findChatRoomsByUserIdAndType(
             ObjectId(userId),
+            ChatRoomType.DIRECT,
             pageable,
-            ChatRoomType.DIRECT
         )
         val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
         return PageImpl(chatRoomList)
