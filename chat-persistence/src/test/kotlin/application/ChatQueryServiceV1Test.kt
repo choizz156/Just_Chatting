@@ -52,7 +52,7 @@ class ChatQueryServiceV1Test(
 
         val entity = ChatRoom(
             name = "testRoom",
-            createdBy = user.id
+            createdBy = user.id.toString(),
         )
         val chatRoom = chatRoomRepository.save(entity)
 
@@ -73,23 +73,23 @@ class ChatQueryServiceV1Test(
         val user2 =
             userRepository.save(User(email = "user2@test.com", password = "p", nickname = "user2"))
 
-        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1.id))
-        val room2 = chatRoomRepository.save(ChatRoom(name = "room2", createdBy = user1.id))
-        val room3 = chatRoomRepository.save(ChatRoom(name = "room3", createdBy = user2.id))
-        val room4 = chatRoomRepository.save(ChatRoom(name = "room4", createdBy = user2.id))
+        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1.id.toString()))
+        val room2 = chatRoomRepository.save(ChatRoom(name = "room2", createdBy = user1.id.toString()))
+        val room3 = chatRoomRepository.save(ChatRoom(name = "room3", createdBy = user2.id.toString()))
+        val room4 = chatRoomRepository.save(ChatRoom(name = "room4", createdBy = user2.id.toString()))
 
 
         chatRoomMemberRepository.saveAll(
             listOf(
-                ChatRoomMember(chatRoomId = room1.id, userId = user1.id),
-                ChatRoomMember(chatRoomId = room2.id, userId = user1.id),
+                ChatRoomMember(chatRoomId = room1.id.toString(), userId = user1.id.toString()),
+                ChatRoomMember(chatRoomId = room2.id.toString(), userId = user1.id.toString()),
             )
         )
 
         chatRoomMemberRepository.saveAll(
             listOf(
-                ChatRoomMember(chatRoomId = room3.id, userId = user2.id),
-                ChatRoomMember(chatRoomId = room4.id, userId = user2.id)
+                ChatRoomMember(chatRoomId = room3.id.toString(), userId = user2.id.toString()),
+                ChatRoomMember(chatRoomId = room4.id.toString(), userId = user2.id.toString())
             )
         )
 
@@ -115,13 +115,13 @@ class ChatQueryServiceV1Test(
         //given
         val user1 =
             userRepository.save(User(email = "user1@test.com", password = "p", nickname = "user1"))
-        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1.id))
-        val room2 = chatRoomRepository.save(ChatRoom(name = "ro1", createdBy = user1.id))
+        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1.id.toString()))
+        val room2 = chatRoomRepository.save(ChatRoom(name = "ro1", createdBy = user1.id.toString()))
 
         chatRoomMemberRepository.saveAll(
             listOf(
-                ChatRoomMember(chatRoomId = room1.id, userId = user1.id),
-                ChatRoomMember(chatRoomId = room2.id, userId = user1.id)
+                ChatRoomMember(chatRoomId = room1.id.toString(), userId = user1.id.toString()),
+                ChatRoomMember(chatRoomId = room2.id.toString(), userId = user1.id.toString())
             )
         )
 
@@ -139,13 +139,13 @@ class ChatQueryServiceV1Test(
         //given
         val user1 =
             userRepository.save(User(email = "user1@test.com", password = "p", nickname = "user1"))
-        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1.id))
-        val room2 = chatRoomRepository.save(ChatRoom(name = "ro1", createdBy = user1.id))
+        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1.id.toString()))
+        val room2 = chatRoomRepository.save(ChatRoom(name = "ro1", createdBy = user1.id.toString()))
 
         chatRoomMemberRepository.saveAll(
             listOf(
-                ChatRoomMember(chatRoomId = room1.id, userId = user1.id),
-                ChatRoomMember(chatRoomId = room2.id, userId = user1.id)
+                ChatRoomMember(chatRoomId = room1.id.toString(), userId = user1.id.toString()),
+                ChatRoomMember(chatRoomId = room2.id.toString(), userId = user1.id.toString())
             )
         )
 
@@ -167,12 +167,12 @@ class ChatQueryServiceV1Test(
         val user2 =
             userRepository.save(User(email = "user2@test.com", password = "p", nickname = "user2"))
 
-        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1.id))
+        val room1 = chatRoomRepository.save(ChatRoom(name = "room1", createdBy = user1.id.toString()))
 
         chatRoomMemberRepository.saveAll(
             listOf(
-                ChatRoomMember(chatRoomId = room1.id, userId = user1.id),
-                ChatRoomMember(chatRoomId = room1.id, userId = user2.id)
+                ChatRoomMember(chatRoomId = room1.id.toString(), userId = user1.id.toString()),
+                ChatRoomMember(chatRoomId = room1.id.toString(), userId = user2.id.toString())
             )
         )
 

@@ -24,20 +24,31 @@ class ChatQueryServiceV1(
     private val dtoConverter: DtoConverter
 ) : ChatQueryService {
 
-    override fun findAllGroupChatRooms(userId: String, pageable: Pageable): Page<ChatRoomDto> {
-        val chatRooms = chatRoomRepository.findAllByTypeAndCreatedByNot(ChatRoomType.GROUP, ObjectId(userId), pageable)
+    override fun findAllGroupChatRoomsExceptMe(
+        userId: String,
+        pageable: Pageable
+    ): Page<ChatRoomDto> {
+        val chatRooms =
+            chatRoomRepository.findAllGroupChatRoomNotUserId(userId, ChatRoomType.GROUP, pageable)
         val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
-        return PageImpl(chatRoomList, PageRequest.of(pageable.pageNumber, pageable.pageSize), chatRoomList.size.toLong())
+        return PageImpl(
+            chatRoomList,
+            PageRequest.of(pageable.pageNumber, pageable.pageSize),
+            chatRoomList.size.toLong()
+        )
     }
 
     override fun findGroupChatRooms(userId: String, pageable: Pageable): Page<ChatRoomDto> {
         val chatRooms = chatRoomRepository.findChatRoomsByUserIdAndType(
-            ObjectId(userId),
-            ChatRoomType.GROUP,
+            userId,
             pageable,
         )
         val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
-        return PageImpl(chatRoomList, PageRequest.of(pageable.pageNumber, pageable.pageSize), chatRoomList.size.toLong())
+        return PageImpl(
+            chatRoomList,
+            PageRequest.of(pageable.pageNumber, pageable.pageSize),
+            chatRoomList.size.toLong()
+        )
     }
 
     override fun findDirectChatRooms(
@@ -45,12 +56,15 @@ class ChatQueryServiceV1(
         pageable: Pageable
     ): Page<ChatRoomDto> {
         val chatRooms = chatRoomRepository.findChatRoomsByUserIdAndType(
-            ObjectId(userId),
-            ChatRoomType.DIRECT,
+            userId,
             pageable,
         )
         val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
-        return PageImpl(chatRoomList, PageRequest.of(pageable.pageNumber, pageable.pageSize), chatRoomList.size.toLong())
+        return PageImpl(
+            chatRoomList,
+            PageRequest.of(pageable.pageNumber, pageable.pageSize),
+            chatRoomList.size.toLong()
+        )
     }
 
     override fun searchChatRooms(query: String): List<ChatRoomDto> {

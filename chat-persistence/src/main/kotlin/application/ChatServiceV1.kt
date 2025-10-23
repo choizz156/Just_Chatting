@@ -60,8 +60,8 @@ class ChatServiceV1(
         validator.isChatRoomMemberAlready(roomId, userId)
 
         val member = ChatRoomMember(
-            chatRoomId = chatRoom.id,
-            userId = user.id,
+            chatRoomId = chatRoom.id.toString(),
+            userId = user.id.toString(),
             role = MemberRole.MEMBER
         )
         chatRoomMemberRepository.save(member)
@@ -154,8 +154,8 @@ class ChatServiceV1(
         creator: User
     ) {
         val ownerMember = ChatRoomMember(
-            chatRoomId = savedRoom.id,
-            userId = creator.id,
+            chatRoomId = savedRoom.id.toString(),
+            userId = creator.id.toString(),
             role = MemberRole.OWNER
         )
         chatRoomMemberRepository.save(ownerMember)
@@ -179,7 +179,7 @@ class ChatServiceV1(
             type = request.type,
             imageUrl = request.imageUrl,
             maxMembers = request.maxMembers,
-            createdBy = creator.id
+            createdBy = creator.id.toString()
         )
 
         return chatRoomRepository.save(chatRoom)
@@ -197,7 +197,7 @@ class ChatServiceV1(
             imageUrl = request.imageUrl,
             maxMembers = request.maxMembers,
             clientId = request.clientId,
-            createdBy = creator.id
+            createdBy = creator.id.toString()
         )
         return chatRoomRepository.save(chatRoom)
     }

@@ -3,7 +3,6 @@ package com.chat.persistence.repository
 import com.chat.core.domain.entity.ChatRoom
 import com.chat.core.domain.entity.ChatRoomType
 import com.chat.core.domain.entity.User
-import org.bson.types.ObjectId
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.repository.Aggregation
 import org.springframework.data.mongodb.repository.MongoRepository
@@ -17,17 +16,23 @@ interface ChatRoomRepository : MongoRepository<ChatRoom, String> {
     @Aggregation(
         pipeline = [
             "{ \$match: { 'isActive': true }}",
-            "{ \$lookup: { from: 'chat_room_members', localField: '_id', foreignField: 'chatRoomId', as: 'chatRoomInfo'}}",
+            "{ \$lookup: { " +
+                    "from: 'chat_room_members', " +
+                    "let: { roomId: '\$_id' }, " +
+                    "pipeline: [ " +
+                    "{ \$match: { \$expr: { \$eq: [ { \$toString: '\$\$roomId' }, '\$chatRoomId' ] } } } " +
+                    "], " +
+                    "as: 'chatRoomInfo' " +
+                    "} }",
             "{ \$unwind: '\$chatRoomInfo'}",
-            "{ \$match: { 'chatRoomInfo.userId': ?0, 'chatRoomInfo.isActive': true, 'type': ?1 }}",
+            "{ \$match: { 'chatRoomInfo.userId': ?0, 'chatRoomInfo.isActive': true}}",
             "{ \$sort: { 'updatedAt': -1 }}",
             "{ \$group: { _id: '\$_id', doc: { '\$first': '$\$ROOT' } } }",
             "{ \$replaceRoot: { newRoot: '\$doc' } }"
         ]
     )
     fun findChatRoomsByUserIdAndType(
-        userId: ObjectId?,
-        type: ChatRoomType,
+        userId: String?,
         pageable: Pageable,
     ): List<ChatRoom>
 
@@ -39,7 +44,29 @@ interface ChatRoomRepository : MongoRepository<ChatRoom, String> {
         clientId: String
     ): Optional<ChatRoom>
 
-    fun findAllByTypeAndCreatedByNot(type: ChatRoomType, createdBy: ObjectId?, pageable: Pageable): List<ChatRoom>
+    @Aggregation(
+        pipeline = [
+            "{ \$match: { 'isActive': true }}",
+            "{ \$lookup: { " +
+                    "from: 'chat_room_members', " +
+                    "let: { roomId: '\$_id' }, " +
+                    "pipeline: [ " +
+                    "{ \$match: { \$expr: { \$eq: [ { \$toString: '\$\$roomId' }, '\$chatRoomId' ] } } } " +
+                    "], " +
+                    "as: 'chatRoomInfo' " +
+                    "} }",
+            "{ \$unwind: '\$chatRoomInfo'}",
+            "{ \$match: { 'chatRoomInfo.userId': {\$ne: ?0 }, 'chatRoomInfo.isActive': true, 'type': ?1 }}",
+            "{ \$sort: { 'updatedAt': -1 }}",
+            "{ \$group: { _id: '\$_id', doc: { '\$first': '$\$ROOT' } } }",
+            "{ \$replaceRoot: { newRoot: '\$doc' } }"
+        ]
+    )
+    fun findAllGroupChatRoomNotUserId(
+        userId: String?,
+        type: ChatRoomType,
+        pageable: Pageable
+    ): List<ChatRoom>
 }
 
 fun ChatRoomRepository.findByIdOrThrow(roomId: String): ChatRoom =

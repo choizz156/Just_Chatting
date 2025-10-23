@@ -57,7 +57,7 @@ class ChatRoomRepositoryTest {
             ChatRoom(
                 name = "test1",
                 type = ChatRoomType.GROUP,
-                createdBy = testUser.id
+                createdBy = testUser.id.toString()
             )
         )
 
@@ -65,18 +65,18 @@ class ChatRoomRepositoryTest {
             ChatRoom(
                 name = "test2",
                 type = ChatRoomType.GROUP,
-                createdBy = testUser.id
+                createdBy = testUser.id.toString()
             )
         )
 
         val chatRoomMember1 = ChatRoomMember(
-            userId = testUser.id,
-            chatRoomId = chatRoom1.id,
+            userId = testUser.id.toString(),
+            chatRoomId = chatRoom1.id.toString(),
             role = MemberRole.MEMBER
         )
         val chatRoomMember2 = ChatRoomMember(
-            userId = testUser.id,
-            chatRoomId = chatRoom2.id,
+            userId = testUser.id.toString(),
+            chatRoomId = chatRoom2.id.toString(),
             role = MemberRole.MEMBER
         )
 
@@ -109,7 +109,7 @@ class ChatRoomRepositoryTest {
         val chatRoom3Dto = ChatRoom(
             name = "test3",
             type = ChatRoomType.GROUP,
-            createdBy = testUser.id
+            createdBy = testUser.id.toString()
         )
         chatRoomRepository.save(chatRoom3Dto)
 
@@ -130,7 +130,7 @@ class ChatRoomRepositoryTest {
         val chatRoom3Dto = ChatRoom(
             name = "테스트 채팅방",
             type = ChatRoomType.GROUP,
-            createdBy = testUser.id
+            createdBy = testUser.id.toString()
         )
         chatRoomRepository.save(chatRoom3Dto)
 
@@ -151,7 +151,7 @@ class ChatRoomRepositoryTest {
         val chatRoom3Dto = ChatRoom(
             name = "테스트 채팅방",
             type = ChatRoomType.GROUP,
-            createdBy = testUser.id
+            createdBy =  testUser.id.toString()
         )
         val chatRoom = chatRoomRepository.save(chatRoom3Dto)
 
@@ -189,19 +189,19 @@ class ChatRoomRepositoryTest {
             ChatRoom(
                 name = "test2",
                 type = ChatRoomType.GROUP,
-                createdBy = user.id
+                createdBy = user.id.toString()
             )
         )
 
         val chatRoomMember = ChatRoomMember(
-            userId = testUser.id,
-            chatRoomId = user.id,
+            userId = testUser.id.toString(),
+            chatRoomId = user.id.toString(),
             role = MemberRole.MEMBER
         )
 
-        val result: List<ChatRoom> = chatRoomRepository.findAllByTypeAndCreatedByNot(
+        val result: List<ChatRoom> = chatRoomRepository.findAllGroupChatRoomNotUserId(
             ChatRoomType.GROUP,
-            user.id,
+            user.id.toString(),
             PageRequest.of(0, 10)
         )
 

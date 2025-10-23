@@ -31,7 +31,7 @@ data class ChatRoom(
 
     val clientId: String? = null,
 
-    val createdBy: ObjectId? = null,
+    val createdBy: String? = null,
 
     @CreatedDate
     val createdAt: Instant = Instant.now(),

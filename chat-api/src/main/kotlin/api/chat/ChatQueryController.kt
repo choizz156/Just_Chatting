@@ -21,20 +21,20 @@ class ChatQueryController(
         @RequestParam userId: String,
         @PageableDefault(size = 20) pageable: Pageable
     ): ApiResponseDto<Page<ChatRoomDto>> {
-        val chatRooms = chatQueryService.findAllGroupChatRooms(userId, pageable)
+        val chatRooms = chatQueryService.findAllGroupChatRoomsExceptMe(userId, pageable)
         return ApiResponseDto(chatRooms)
     }
 
-    @GetMapping("/group")
-    fun getGroupChatRooms(
-        @RequestParam userId: String,
-        @PageableDefault(size = 20) pageable: Pageable
-    ): ApiResponseDto<Page<ChatRoomDto>> {
-        val chatRooms = chatQueryService.findGroupChatRooms(userId, pageable)
-        return ApiResponseDto.to(chatRooms)
-    }
+//    @GetMapping("/group")
+//    fun getGroupChatRooms(
+//        @RequestParam userId: String,
+//        @PageableDefault(size = 20) pageable: Pageable
+//    ): ApiResponseDto<Page<ChatRoomDto>> {
+//        val chatRooms = chatQueryService.findGroupChatRooms(userId, pageable)
+//        return ApiResponseDto.to(chatRooms)
+//    }
 
-    @GetMapping("/direct")
+    @GetMapping
     fun getDirectChatRooms(
         @RequestParam userId: String,
         @PageableDefault(size = 20) pageable: Pageable
