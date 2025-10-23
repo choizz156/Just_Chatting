@@ -18,10 +18,11 @@ class ChatQueryController(
 
     @GetMapping("/group/all")
     fun getRandomGroupChatRooms(
+        @RequestParam userId: String,
         @PageableDefault(size = 20) pageable: Pageable
     ): ApiResponseDto<Page<ChatRoomDto>> {
-        val chatRooms = chatQueryService.findAllGroupChatRooms(pageable)
-        return ApiResponseDto.to(chatRooms)
+        val chatRooms = chatQueryService.findAllGroupChatRooms(userId, pageable)
+        return ApiResponseDto(chatRooms)
     }
 
     @GetMapping("/group")

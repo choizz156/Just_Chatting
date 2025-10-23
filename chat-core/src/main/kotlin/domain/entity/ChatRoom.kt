@@ -20,6 +20,7 @@ data class ChatRoom(
 
     val description: String? = null,
 
+    @Indexed
     val type: ChatRoomType = ChatRoomType.GROUP,
 
     val imageUrl: String? = null,
@@ -30,7 +31,7 @@ data class ChatRoom(
 
     val clientId: String? = null,
 
-    val createdBy: User? = null,
+    val createdBy: ObjectId? = null,
 
     @CreatedDate
     val createdAt: Instant = Instant.now(),

@@ -39,8 +39,7 @@ interface ChatRoomRepository : MongoRepository<ChatRoom, String> {
         clientId: String
     ): Optional<ChatRoom>
 
-    fun findAllByType(type: ChatRoomType, pageable: Pageable): List<ChatRoom>
-
+    fun findAllByTypeAndCreatedByNot(type: ChatRoomType, createdBy: ObjectId?, pageable: Pageable): List<ChatRoom>
 }
 
 fun ChatRoomRepository.findByIdOrThrow(roomId: String): ChatRoom =

@@ -179,7 +179,7 @@ class ChatServiceV1(
             type = request.type,
             imageUrl = request.imageUrl,
             maxMembers = request.maxMembers,
-            createdBy = creator
+            createdBy = creator.id
         )
 
         return chatRoomRepository.save(chatRoom)
@@ -197,7 +197,7 @@ class ChatServiceV1(
             imageUrl = request.imageUrl,
             maxMembers = request.maxMembers,
             clientId = request.clientId,
-            createdBy = creator
+            createdBy = creator.id
         )
         return chatRoomRepository.save(chatRoom)
     }

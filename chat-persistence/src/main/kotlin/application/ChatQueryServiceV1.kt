@@ -10,6 +10,7 @@ import com.chat.persistence.repository.findByIdOrThrow
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,10 +24,10 @@ class ChatQueryServiceV1(
     private val dtoConverter: DtoConverter
 ) : ChatQueryService {
 
-    override fun findAllGroupChatRooms(pageable: Pageable): Page<ChatRoomDto> {
-        val chatRooms = chatRoomRepository.findAllByType(ChatRoomType.GROUP, pageable)
+    override fun findAllGroupChatRooms(userId: String, pageable: Pageable): Page<ChatRoomDto> {
+        val chatRooms = chatRoomRepository.findAllByTypeAndCreatedByNot(ChatRoomType.GROUP, ObjectId(userId), pageable)
         val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
-        return PageImpl(chatRoomList)
+        return PageImpl(chatRoomList, PageRequest.of(pageable.pageNumber, pageable.pageSize), chatRoomList.size.toLong())
     }
 
     override fun findGroupChatRooms(userId: String, pageable: Pageable): Page<ChatRoomDto> {
@@ -36,7 +37,7 @@ class ChatQueryServiceV1(
             pageable,
         )
         val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
-        return PageImpl(chatRoomList)
+        return PageImpl(chatRoomList, PageRequest.of(pageable.pageNumber, pageable.pageSize), chatRoomList.size.toLong())
     }
 
     override fun findDirectChatRooms(
@@ -49,7 +50,7 @@ class ChatQueryServiceV1(
             pageable,
         )
         val chatRoomList = chatRooms.map { dtoConverter.chatRoomToDto(it) }
-        return PageImpl(chatRoomList)
+        return PageImpl(chatRoomList, PageRequest.of(pageable.pageNumber, pageable.pageSize), chatRoomList.size.toLong())
     }
 
     override fun searchChatRooms(query: String): List<ChatRoomDto> {

@@ -35,7 +35,7 @@ class DtoConverter(
             isActive = chatRoom.isActive,
             maxMembers = chatRoom.maxMembers,
             memberCount = memberCount,
-            createdBy = chatRoom.createdBy!!.id!!.toString(),
+            createdBy = chatRoom.createdBy.toString(),
             createdAt = chatRoom.createdAt,
             lastMessage = lastMessage
         )
