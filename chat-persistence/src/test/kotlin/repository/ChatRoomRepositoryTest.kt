@@ -90,9 +90,8 @@ class ChatRoomRepositoryTest {
 
         //when
         val result =
-            chatRoomRepository.findChatRoomsByUserIdAndType(
-                testUser.id,
-                ChatRoomType.GROUP,
+            chatRoomRepository.findChatRoomsByUserId(
+                testUser.id.toString(),
                 PageRequest.of(0, 10),
             )
 
@@ -151,7 +150,7 @@ class ChatRoomRepositoryTest {
         val chatRoom3Dto = ChatRoom(
             name = "테스트 채팅방",
             type = ChatRoomType.GROUP,
-            createdBy =  testUser.id.toString()
+            createdBy = testUser.id.toString()
         )
         val chatRoom = chatRoomRepository.save(chatRoom3Dto)
 
@@ -175,7 +174,7 @@ class ChatRoomRepositoryTest {
 
     @DisplayName("나를 제외한 그룹 채팅방을 조회할 수 있다.")
     @Test
-    fun `find room`(){
+    fun `find room`() {
         val user = userRepository.save(
             User(
                 email = "test@google.com",
@@ -200,8 +199,8 @@ class ChatRoomRepositoryTest {
         )
 
         val result: List<ChatRoom> = chatRoomRepository.findAllGroupChatRoomNotUserId(
-            ChatRoomType.GROUP,
             user.id.toString(),
+            ChatRoomType.GROUP,
             PageRequest.of(0, 10)
         )
 

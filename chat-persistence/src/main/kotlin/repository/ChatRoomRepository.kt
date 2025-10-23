@@ -31,7 +31,7 @@ interface ChatRoomRepository : MongoRepository<ChatRoom, String> {
             "{ \$replaceRoot: { newRoot: '\$doc' } }"
         ]
     )
-    fun findChatRoomsByUserIdAndType(
+    fun findChatRoomsByUserId(
         userId: String?,
         pageable: Pageable,
     ): List<ChatRoom>
