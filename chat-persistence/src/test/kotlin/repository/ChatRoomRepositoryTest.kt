@@ -26,6 +26,7 @@ import org.springframework.test.context.ContextConfiguration
 )
 @DataMongoTest
 class ChatRoomRepositoryTest {
+
     @Autowired
     private lateinit var chatRoomRepository: ChatRoomRepository
 
@@ -56,7 +57,7 @@ class ChatRoomRepositoryTest {
             ChatRoom(
                 name = "test1",
                 type = ChatRoomType.GROUP,
-                createdBy = testUser
+                createdBy = testUser.id
             )
         )
 
@@ -64,7 +65,7 @@ class ChatRoomRepositoryTest {
             ChatRoom(
                 name = "test2",
                 type = ChatRoomType.GROUP,
-                createdBy = testUser
+                createdBy = testUser.id
             )
         )
 
@@ -108,7 +109,7 @@ class ChatRoomRepositoryTest {
         val chatRoom3Dto = ChatRoom(
             name = "test3",
             type = ChatRoomType.GROUP,
-            createdBy = testUser
+            createdBy = testUser.id
         )
         chatRoomRepository.save(chatRoom3Dto)
 
@@ -129,7 +130,7 @@ class ChatRoomRepositoryTest {
         val chatRoom3Dto = ChatRoom(
             name = "테스트 채팅방",
             type = ChatRoomType.GROUP,
-            createdBy = testUser
+            createdBy = testUser.id
         )
         chatRoomRepository.save(chatRoom3Dto)
 
@@ -150,7 +151,7 @@ class ChatRoomRepositoryTest {
         val chatRoom3Dto = ChatRoom(
             name = "테스트 채팅방",
             type = ChatRoomType.GROUP,
-            createdBy = testUser
+            createdBy = testUser.id
         )
         val chatRoom = chatRoomRepository.save(chatRoom3Dto)
 
@@ -170,5 +171,44 @@ class ChatRoomRepositoryTest {
         //when then
         assertThatThrownBy { chatRoomRepository.findByIdOrThrow("noExist") }
             .isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @DisplayName("나를 제외한 그룹 채팅방을 조회할 수 있다.")
+    @Test
+    fun `find room`(){
+        val user = userRepository.save(
+            User(
+                email = "test@google.com",
+                password = "password",
+                nickname = "testUser2",
+                profileImageUrl = null
+            )
+        )
+
+        val chatRoom = chatRoomRepository.save(
+            ChatRoom(
+                name = "test2",
+                type = ChatRoomType.GROUP,
+                createdBy = user.id
+            )
+        )
+
+        val chatRoomMember = ChatRoomMember(
+            userId = testUser.id,
+            chatRoomId = user.id,
+            role = MemberRole.MEMBER
+        )
+
+        val result: List<ChatRoom> = chatRoomRepository.findAllByTypeAndCreatedByNot(
+            ChatRoomType.GROUP,
+            user.id,
+            PageRequest.of(0, 10)
+        )
+
+        val findAll = chatRoomRepository.findAll()
+
+        assertThat(result).hasSize(2)
+        assertThat(findAll).hasSize(3)
+
     }
 }

@@ -54,7 +54,7 @@ class ChatMessageRepositoryTest {
         testChatRoom = chatRoomRepository.save(ChatRoom(
             name = "test1",
             type = ChatRoomType.GROUP,
-            createdBy = testUser
+            createdBy = testUser.id
         ))
     }
 
